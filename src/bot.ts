@@ -2,13 +2,18 @@
 // Licensed under the MIT License.
 
 import { ActivityHandler, MessageFactory } from 'botbuilder';
+import { MessageController} from './Controllers/MessageController'
 
 export class EchoBot extends ActivityHandler {
+    private _messageController: MessageController;
+
     constructor() {
         super();
+        this._messageController = new MessageController();
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
-            const replyText = `Echo: ${ context.activity.text }`;
+
+            const replyText = this._messageController.parse(context.activity)
             await context.sendActivity(MessageFactory.text(replyText, replyText));
             // By calling next() you ensure that the next BotHandler is run.
             await next();
@@ -16,7 +21,7 @@ export class EchoBot extends ActivityHandler {
 
         this.onMembersAdded(async (context, next) => {
             const membersAdded = context.activity.membersAdded;
-            const welcomeText = 'Hello and welcome!';
+            const welcomeText = 'Hi there, I\'m otterbrass reloaded';
             for (const member of membersAdded) {
                 if (member.id !== context.activity.recipient.id) {
                     await context.sendActivity(MessageFactory.text(welcomeText, welcomeText));
