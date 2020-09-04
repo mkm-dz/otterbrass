@@ -2,7 +2,7 @@ import { MessageControllerInterface } from '../Interfaces/MessageControllerInter
 import { ChannelControllersInterface } from '../Interfaces/ChannelControllersInterface';
 import { TeamsChannelController } from './TeamsChannelController';
 import { CommonMessagesController } from './CommonMessageController';
-import { Activity } from 'botbuilder';
+import { Activity, TurnContext } from 'botbuilder';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { User } from '../Models/User';
 import { Channel } from '../Models/Channel';
@@ -17,24 +17,24 @@ import { Constants } from '../Common/Constants';
 
 export class OtterBrassMessageController implements MessageControllerInterface {
 
-    private static readonly myLazyController = () => {
-        return new OtterBrassMessageController();
+    private static readonly myLazyController = (context: TurnContext) => {
+        return new OtterBrassMessageController(context);
     }
 
-    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance();
-    private _commonMessageController: CommonMessagesController = CommonMessagesController.instance();
+    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance(this.context);
+    private _commonMessageController: CommonMessagesController = CommonMessagesController.instance(this.context);
 
     /**
      * Initializes a new instance of the <see cref="OtterBrassMessageController"/> class.
      */
     // tslint:disable-next-line: no-empty
-    private OtterBrassMessageController() {}
+    private constructor(private context: TurnContext) {}
 
     /**
      * Gets a singleton instance of the HttpController class.
      */
-    public static instance(): MessageControllerInterface {
-        return OtterBrassMessageController.myLazyController();
+    public static instance(context: TurnContext): MessageControllerInterface {
+        return OtterBrassMessageController.myLazyController(context);
     }
 
     /**

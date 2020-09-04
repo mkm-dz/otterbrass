@@ -13,13 +13,16 @@ export class EchoBot extends ActivityHandler {
         // See https://aka.ms/about-bot-activity-message to learn more about the message and other activity types.
         this.onMessage(async (context, next) => {
 
-            const replyText = this._messageController.parse(context.activity)
-            await context.sendActivity(MessageFactory.text(replyText, replyText));
+            await this._messageController.parse(context)
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
 
         this.onMembersAdded(async (context, next) => {
+            if(!context.activity.membersAdded){
+                return ;
+            }
+
             const membersAdded = context.activity.membersAdded;
             const welcomeText = 'Hi there, I\'m otterbrass reloaded';
             for (const member of membersAdded) {

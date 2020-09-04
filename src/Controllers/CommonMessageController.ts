@@ -1,6 +1,6 @@
 import { ChannelControllersInterface } from '../Interfaces/ChannelControllersInterface';
 import { TeamsChannelController } from './TeamsChannelController';
-import { Activity, Entity, Mention, ChannelAccount } from 'botbuilder';
+import { Activity, Entity, Mention, ChannelAccount, TurnContext } from 'botbuilder';
 import { Channel } from '../Models/Channel';
 import { User } from '../Models/User';
 import { Utilities } from '../Common/Utilities';
@@ -12,22 +12,28 @@ import { Constants } from '../Common/Constants';
 
 export class CommonMessagesController {
     private static _myLazyController: CommonMessagesController;
+    private context: TurnContext;
 
-    private static readonly myLazyController = () => {
+    private constructor(context: TurnContext) {
+        this.context = context;
+    }
+
+    private static readonly myLazyController = (context: TurnContext) => {
         if (!CommonMessagesController._myLazyController) {
-            CommonMessagesController._myLazyController = new CommonMessagesController();
+            CommonMessagesController._myLazyController = new CommonMessagesController(context);
         }
 
+        CommonMessagesController._myLazyController.context = context;
         return CommonMessagesController._myLazyController;
     };
 
-    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance();
+    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance(this.context);
 
     /**
      * Gets a singleton instance of the CommonMessagesController class.
      */
-    public static instance(): CommonMessagesController {
-        return CommonMessagesController.myLazyController();
+    public static instance(context: TurnContext): CommonMessagesController {
+        return CommonMessagesController.myLazyController(context);
     }
 
 

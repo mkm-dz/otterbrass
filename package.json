@@ -2,7 +2,7 @@
     "name": "Otterbrass",
     "version": "1.0.0",
     "description": "RoundRobin",
-    "author": "Generated using Microsoft Bot Builder Yeoman generator v4.9.0",
+    "author": "Vidal Ortega",
     "license": "MIT",
     "main": "./lib/index.js",
     "scripts": {

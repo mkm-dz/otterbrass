@@ -1,7 +1,7 @@
 
 import {InstructionsParser} from '../Parsers/InstructionsParser';
 import {EnumInstructions} from '../Enums/EnumInstructions';
-import { Activity } from 'botbuilder';
+import { TurnContext } from 'botbuilder';
 import { OtterBrassMessageController } from './OtterbrassMessageController';
 import { TeamsChannelController } from './TeamsChannelController';
 import { MessageControllerInterface } from '../Interfaces/MessageControllerInterface';
@@ -13,62 +13,62 @@ import { EnumRandomOperations } from '../Enums/EnumRandomOperations';
 
 export class MessageController {
 
-    private _messageController: MessageControllerInterface = OtterBrassMessageController.instance();
-    private _channelController: ChannelControllersInterface = TeamsChannelController.instance();
-
-    public async parse(activity: Activity) {
+    public async parse(context: TurnContext) {
         // We don't need to reply to things that are not an activity, also for now we just focus on messages
-        if (!activity || 'message' !== activity.type.toLowerCase())
+        if (!context || !context.activity || 'message' !== context.activity.type.toLowerCase())
         {
             return;
         }
+        const activity = context.activity;
+        const _messageController: MessageControllerInterface = OtterBrassMessageController.instance(context);
+        const _channelController: ChannelControllersInterface = TeamsChannelController.instance(context);
 
         switch (InstructionsParser.parse(activity.text))
         {
             case EnumInstructions.AddUser:
                 {
-                    this._messageController.addUser(activity);
+                    _messageController.addUser(activity);
                     break;
                 }
             case EnumInstructions.NextInLine:
                 {
                     const size = Utilities.getItemSize(activity.text);
-                    const nextUser = await this._messageController.getNext(activity, size);
-                    await this._messageController.getNextRandomUser(activity, size, nextUser ? [nextUser] : []);
-                    await this._messageController.getNextinLineUsers(activity);
+                    const nextUser = await _messageController.getNext(activity, size);
+                    await _messageController.getNextRandomUser(activity, size, nextUser ? [nextUser] : []);
+                    await _messageController.getNextinLineUsers(activity);
                     break;
                 }
             case EnumInstructions.Assign:
                 {
                     const size = Utilities.getItemSize(activity.text);
-                    const users = await this._messageController.assign(activity, size);
-                    await this._messageController.getNextinLineUsers(activity);
+                    const users = await _messageController.assign(activity, size);
+                    await _messageController.getNextinLineUsers(activity);
                     break;
                 }
             case EnumInstructions.Help:
                 {
-                    await this._channelController.createReply(BotMessages.HELP, activity);
+                    await _channelController.createReply(BotMessages.HELP, activity);
                     break;
                 }
             case EnumInstructions.Changelog:
                 {
-                    await this._channelController.createReply(BotMessages.CHANGELOG, activity);
+                    await _channelController.createReply(BotMessages.CHANGELOG, activity);
                     break;
                 }
             case EnumInstructions.RemoveWithUser:
                 {
-                    this._messageController.removeUserWithName(activity);
+                    _messageController.removeUserWithName(activity);
                     break;
                 }
 
             case EnumInstructions.Remove:
                 {
-                    this._messageController.removeUser(activity);
+                    _messageController.removeUser(activity);
                     break;
                 }
             case EnumInstructions.Scoreboard:
                 {
-                    this._messageController.scoreBoard(activity);
+                    _messageController.scoreBoard(activity);
                     break;
                 }
             case EnumInstructions.OofStatus:
@@ -77,11 +77,11 @@ export class MessageController {
 
                     if (oofStatus === EnumOofStatus.None)
                     {
-                        await this._channelController.createReply(BotMessages.INCORRECT_OOF, activity);
+                        await _channelController.createReply(BotMessages.INCORRECT_OOF, activity);
                     }
                     else
                     {
-                        await this._messageController.setOofStatus(activity, oofStatus);
+                        await _messageController.setOofStatus(activity, oofStatus);
                     }
 
                     break;
@@ -92,11 +92,11 @@ export class MessageController {
 
                     if (randomOperation === EnumRandomOperations.None)
                     {
-                        await this._channelController.createReply(BotMessages.INCORRECT_RANDOM, activity);
+                        await _channelController.createReply(BotMessages.INCORRECT_RANDOM, activity);
                     }
                     else
                     {
-                        await this._messageController.setRandomStatus(activity, randomOperation);
+                        await _messageController.setRandomStatus(activity, randomOperation);
                     }
 
                     break;
@@ -107,11 +107,11 @@ export class MessageController {
 
                     if (randomOperation === EnumRandomOperations.None)
                     {
-                        await this._channelController.createReply(BotMessages.INCORRECT_RANDOMNESS, activity);
+                        await _channelController.createReply(BotMessages.INCORRECT_RANDOMNESS, activity);
                     }
                     else
                     {
-                        await this._messageController.setRandomness(activity, randomOperation);
+                        await _messageController.setRandomness(activity, randomOperation);
                     }
 
                     break;
@@ -119,7 +119,7 @@ export class MessageController {
             case EnumInstructions.None:
             default:
                 {
-                    await this._channelController.createReply(BotMessages.INCORRECT_MESSAGE, activity);
+                    await _channelController.createReply(BotMessages.INCORRECT_MESSAGE, activity);
                     break;
                 }
         }
