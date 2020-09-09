@@ -2,6 +2,9 @@ import { Channel } from '../Models/Channel';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { User } from '../Models/User';
 import { EnumDaoResults } from '../Enums/EnumDaoResults';
+import { Constants } from '../Common/Constants';
+
+const sql = require('mssql');
 
 /**
  * The data access object used in the communication with the review database.
@@ -70,43 +73,34 @@ export class ReviewDao {
      * @param channel The channel associated.
      * @param howMany When number of users that will be retrieved.
      */
-    public nextUsers(channel: Channel, howMany: number): User[] {
-        const results: User[] = []
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetNextUsers";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@howMany", System.Data.SqlDbType.Int);
+    public async nextUsers(channel: Channel, howMany: number): Promise<User[]> {
+        const result: User[] = [];
+        async function execute() {
+            try {
+                const pool = await sql.connect(Constants.SERVER_CONFIG);
+                const data = await pool.request()
+                    .input('channelId', sql.NVarChar, channel.id)
+                    .input('howMany', sql.Int, howMany)
+                    .execute('usp_GetNextUsers');
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //         sqlCmd.Parameters["@howMany"].Value = howMany;
+                for (const item of data.recordset) {
+                    const currentUser = new User();
+                    currentUser.id = item.Id;
+                    currentUser.name = item.Name;
+                    currentUser.rank = item.Ranking;
+                    result.push(currentUser);
+                }
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             User currentUser = new User();
-        //             currentUser.Id = reader["Id"].ToString();
-        //             currentUser.Name = reader["Name"].ToString();
-        //             currentUser.Rank = Convert.ToDouble(reader["Ranking"]);
-        //             currentUser.UserChannel = channel;
-        //             results.Add(currentUser);
-        //         }
+                pool.close();
+                sql.close();
+                return result;
+            } catch (error) {
+                // TODO: handle error gracefully.
+                throw error;
+            }
+        }
 
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
-
-        return results;
+        return await execute();
     }
 
     /**

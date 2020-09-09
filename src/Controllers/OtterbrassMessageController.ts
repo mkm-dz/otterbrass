@@ -381,7 +381,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         let replyMsg = '';
         const reviewDao = new ReviewDao();
-        const users = reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
+        const users = await reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
 
         if (users) {
             for (const user of users) {
@@ -472,7 +472,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         channel.id = channelData.teamsChannelId;
 
         const reviewDao = new ReviewDao();
-        const users = reviewDao.nextUsers(channel, 3);
+        const users = await reviewDao.nextUsers(channel, 3);
         let userNames = '';
         let count = 1;
         if (null != users && users.length > 0) {
@@ -592,7 +592,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             channel.id = channelData.TeamsChannelId;
 
             const reviewDao = new ReviewDao();
-            let users = reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
+            let users = await reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
             let userNames = '';
             let count = 1;
             // TODO: verify this logic as it changed when migrated.
