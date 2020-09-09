@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "removeComments": true,
+    "strict": true,
     "declaration": true,
-    "target": "es2016",
+    "target": "ES2018",
     "module": "commonjs",
     "outDir": "./lib",
     "rootDir": "./src",

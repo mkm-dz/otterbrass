@@ -2,7 +2,7 @@
     "name": "Otterbrass",
     "version": "1.0.0",
     "description": "RoundRobin",
-    "author": "Generated using Microsoft Bot Builder Yeoman generator v4.9.0",
+    "author": "Vidal Ortega",
     "license": "MIT",
     "main": "./lib/index.js",
     "scripts": {
@@ -18,15 +18,17 @@
         "url": "https://github.com"
     },
     "dependencies": {
-        "botbuilder": "~4.9.0",
-        "dotenv": "^8.2.0",
-        "replace": "~1.1.1",
-        "restify": "~8.5.1"
+        "botbuilder": "4.9.0",
+        "botframework-directlinejs": "0.11.6",
+        "dotenv": "8.2.0",
+        "replace": "1.1.1",
+        "restify": "8.5.1"
     },
     "devDependencies": {
         "@types/restify": "8.4.2",
-        "nodemon": "~2.0.4",
-        "tslint": "~6.1.2",
-        "typescript": "~3.9.2"
+        "mssql": "6.2.1",
+        "nodemon": "2.0.4",
+        "tslint": "6.1.2",
+        "typescript": "3.9.2"
     }
 }
