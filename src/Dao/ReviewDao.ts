@@ -16,7 +16,7 @@ export class ReviewDao {
      * @param size The size that will be used for the next user rank.
      * @param sentByUser The user that sent the request and that should not be included in the results.
      */
-    public async nextInLine(channel: Channel, size: EnumShirtSize, sentByUser: User): User | null {
+    public async nextInLine(channel: Channel, size: EnumShirtSize, sentByUser: User): Promise<User | null> {
         if (!sentByUser || !sentByUser.id) {
             return null;
         }
@@ -48,8 +48,6 @@ export class ReviewDao {
             // TODO: handle error gracefully.
             throw error;
         }
-
-        return user;
     }
 
     /**
@@ -150,31 +148,20 @@ export class ReviewDao {
      * @param channel The channel that will have the randomness set.
      * @param randomness The level of randomness assigned to the channel.
      */
-    public setChannelRandomness(channel: Channel, randomness: number) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_SetChannelRandomness";
-        //         sqlCmd.Connection = myConnection;
+    public async setChannelRandomness(channel: Channel, randomness: number) {
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .input('randomLevel', sql.Int, randomness)
+                .execute('usp_SetChannelRandomness');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@randomLevel", System.Data.SqlDbType.Int);
-
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //         sqlCmd.Parameters["@randomLevel"].Value = randomness;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
