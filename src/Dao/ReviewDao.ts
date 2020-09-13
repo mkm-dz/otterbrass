@@ -169,52 +169,38 @@ export class ReviewDao {
      * @param channel A channel from which we want to retrieve the randomness level.</param>
      * <returns>A channel that contains the randomness level
      */
-    public getChannelRandomness(channel: Channel): Channel | null {
-        return null;
-        // if (!channel)
-        // {
-        //     return null;
-        // }
+    public async getChannelRandomness(channel: Channel): Promise<Channel | null> {
+        if (!channel)
+        {
+            return null;
+        }
 
-        // const results :User[] = [];
+        try {
+            let channelRandomness = -1;
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .execute('usp_GetChannelRandomness');
 
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         int channelRandomness = -1;
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetChannelRandomness";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
+            for (const item of data.recordset) {
+                if(-1 === channelRandomness)
+                {
+                    channelRandomness = item.RandomLevel;
+                }
+                else if(channelRandomness !== item.RandomLevel)
+                {
+                    throw new Error("Channel randomness does not match all the values");
+                }
+            }
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
+            pool.close();
+            sql.close();
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             if(-1 == channelRandomness)
-        //             {
-        //                 channelRandomness = Convert.ToInt32(reader["RandomLevel"].ToString());
-        //             }
-        //             else if(channelRandomness != Convert.ToInt32(reader["RandomLevel"].ToString()))
-        //             {
-        //                 throw new Exception("Channel randomness does not match all the values");
-        //             }
-        //         }
-
-        //         channel.Randomness = channelRandomness;
-        //         return channel;
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        //     finally
-        //     {
-        //         myConnection.Close();
-        //     }
+            channel.randomness = channelRandomness;
+            return channel;
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 }
