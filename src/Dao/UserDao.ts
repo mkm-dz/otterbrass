@@ -67,49 +67,39 @@ export class UserDao {
      * @return A <see cref="Dictionary{User, EnumDaoResults}"/> that represents the user and the result
      *   from that operation.
      */
-    public setOofStatus(channel: Channel,
+    public async setOofStatus(channel: Channel,
         oofStatus: EnumOofStatus,
-        users: User[]): Map<User, EnumDaoResults> {
+        users: User[]): Promise<Map<User, EnumDaoResults>> {
         const result = new Map<User, EnumDaoResults>();
 
-        // .NET Core 1.1 does not support datatables so it is the easiest to do this way.
-        // foreach (User user in users)
-        // {
-        //     using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        //     {
-        //         try
-        //         {
-        //             SqlCommand sqlCmd = new SqlCommand();
-        //             sqlCmd.CommandType = CommandType.StoredProcedure;
-        //             sqlCmd.CommandText = "usp_SetOof";
-        //             sqlCmd.Connection = myConnection;
-        //             sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@oofStatus", System.Data.SqlDbType.Int, 255);
-        //             sqlCmd.Parameters.Add("@result", System.Data.SqlDbType.Int);
+        // TODO: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
+        // foreach(User user in users) this can be changed when this is transformed into a REST API call
+        try {
+            for (const user of users) {
+                {
 
-        //             sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //             sqlCmd.Parameters["@userId"].Value = user.Id;
-        //             sqlCmd.Parameters["@oofStatus"].Value = (int)oofStatus;
+                    if (!user.userChannel || !user.userChannel.id) {
+                        // TODO: Log exception gracefully.
+                        throw new Error('Could not remove user because a channel was not provided.')
+                    }
+                    const pool = await sql.connect(Constants.SERVER_CONFIG);
+                    const data = await pool.request()
+                        .input('channelId', sql.NVarChar, user.userChannel.id)
+                        .input('userId', sql.NVarChar, user.id)
+                        .input('oofStatus', sql.Int, user.name)
+                        .output('result', sql.Int, user.userChannel.name)
+                        .execute('usp_SetOof');
 
-        //             sqlCmd.Parameters["@result"].Direction = ParameterDirection.Output;
+                    pool.close();
+                    sql.close();
 
-        //             myConnection.Open();
-        //             sqlCmd.ExecuteNonQuery();
-
-        //             EnumDaoResults recordResult = (EnumDaoResults)Convert.ToInt32(sqlCmd.Parameters["@result"].Value.ToString());
-        //             result.Add(user, recordResult);
-        //         }
-        //         catch (Exception)
-        //         {
-        //             throw;
-        //         }
-        //         finally
-        //         {
-        //             myConnection.Close();
-        //         }
-        //     }
-        // }
+                    result.set(user, data.parameters.result);
+                }
+            }
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
 
         return result;
     }
