@@ -166,7 +166,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         const userDao = new UserDao();
-        const results: Map<User, EnumDaoResults> = userDao.setOofStatus(channel, oofStatus, users);
+        const results: Map<User, EnumDaoResults> = await userDao.setOofStatus(channel, oofStatus, users);
 
         for (const [key, value] of results) {
             switch (value) {
@@ -244,13 +244,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         switch (randomStatus) {
             case EnumRandomOperations.Add:
                 {
-                    userDao.addRandom(currentUser);
+                    await userDao.addRandom(currentUser);
                     replyMsg += BotMessages.RANDOM_CORRECT.replace('{0}', currentUser.name);
                     break;
                 }
             case EnumRandomOperations.Remove:
                 {
-                    userDao.removeRandom(currentUser);
+                    await userDao.removeRandom(currentUser);
                     replyMsg += BotMessages.RANDOM_REMOVE.replace('{0}', currentUser.name);
                     break;
                 }
@@ -346,7 +346,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         channel.name = activity.channelId;
 
         const userDao = new UserDao();
-        const results = userDao.getOofUsers(channel);
+        const results = await userDao.getOofUsers(channel);
 
         let userNames = '';
         let count = 1;
