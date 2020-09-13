@@ -16,54 +16,38 @@ export class ReviewDao {
      * @param size The size that will be used for the next user rank.
      * @param sentByUser The user that sent the request and that should not be included in the results.
      */
-    public nextInLine(channel: Channel, size: EnumShirtSize, sentByUser: User): User | null {
+    public async nextInLine(channel: Channel, size: EnumShirtSize, sentByUser: User): User | null {
         if (!sentByUser || !sentByUser.id) {
             return null;
         }
 
-        const user: User | null = null;
+        let user: User | null = null;
 
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetNext";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@rankIncrement", System.Data.SqlDbType.Float);
-        //         sqlCmd.Parameters.Add("@sentByUserId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userName", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@ranking", System.Data.SqlDbType.NVarChar, 255);
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .input('rankIncrement', sql.Int, size)
+                .input('sentByUserId', sql.NVarChar, sentByUser.id)
+                .output('userName', sql.NVarChar)
+                .output('userId', sql.NVarChar)
+                .output('ranking', sql.NVarChar)
+                .execute('usp_GetNext');
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //         sqlCmd.Parameters["@rankIncrement"].Value = (int)size;
-        //         sqlCmd.Parameters["@sentByUserId"].Value = sentByUser.Id;
+            if (data.parameters.userId) {
+                user = new User();
+                user.id = data.parameters.userId;
+                user.name = data.parameters.userName;
+                user.rank = data.parameters.ranking;
+            }
 
-        //         sqlCmd.Parameters["@userName"].Direction = ParameterDirection.Output;
-        //         sqlCmd.Parameters["@userId"].Direction = ParameterDirection.Output;
-        //         sqlCmd.Parameters["@ranking"].Direction = ParameterDirection.Output;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-
-        //         if (!String.IsNullOrEmpty(sqlCmd.Parameters["@userId"].Value.ToString()))
-        //         {
-        //             user = new User();
-        //             user.UserChannel = channel;
-        //             user.Name = sqlCmd.Parameters["@userName"].Value.ToString();
-        //             user.Id = sqlCmd.Parameters["@userId"].Value.ToString();
-        //         }
-
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+            return user;
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
 
         return user;
     }
