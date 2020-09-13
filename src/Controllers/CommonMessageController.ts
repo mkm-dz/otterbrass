@@ -78,7 +78,8 @@ export class CommonMessagesController {
                 replyMsg += user.name + ', ';
                 user.userChannel = channel;
                 const userDao = new UserDao();
-                userDao.addUser(user);
+                // TODO: Move this to a promise array and complete using Promise.all.
+                await userDao.addUser(user);
             }
         }
 
