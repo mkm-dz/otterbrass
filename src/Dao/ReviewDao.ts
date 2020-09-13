@@ -75,74 +75,58 @@ export class ReviewDao {
      */
     public async nextUsers(channel: Channel, howMany: number): Promise<User[]> {
         const result: User[] = [];
-        async function execute() {
-            try {
-                const pool = await sql.connect(Constants.SERVER_CONFIG);
-                const data = await pool.request()
-                    .input('channelId', sql.NVarChar, channel.id)
-                    .input('howMany', sql.Int, howMany)
-                    .execute('usp_GetNextUsers');
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .input('howMany', sql.Int, howMany)
+                .execute('usp_GetNextUsers');
 
-                for (const item of data.recordset) {
-                    const currentUser = new User();
-                    currentUser.id = item.Id;
-                    currentUser.name = item.Name;
-                    currentUser.rank = item.Ranking;
-                    result.push(currentUser);
-                }
-
-                pool.close();
-                sql.close();
-                return result;
-            } catch (error) {
-                // TODO: handle error gracefully.
-                throw error;
+            for (const item of data.recordset) {
+                const currentUser = new User();
+                currentUser.id = item.Id;
+                currentUser.name = item.Name;
+                currentUser.rank = item.Ranking;
+                result.push(currentUser);
             }
-        }
 
-        return await execute();
+            pool.close();
+            sql.close();
+            return result;
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
      * Gets the next random user in line (without incrementing it's rank)
      * @param channel The channel associated.
      */
-    public getNextRandomUsers(channel: Channel): User[] {
+    public async getNextRandomUsers(channel: Channel): Promise<User[]> {
         const results: User[] = [];
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .execute('usp_GetRandomUsers');
 
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetRandomUsers";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
+            for (const item of data.recordset) {
+                const currentUser = new User();
+                currentUser.id = item.Id;
+                currentUser.name = item.Name;
+                currentUser.rank = item.Ranking;
+                currentUser.userChannel = channel;
+                results.push(currentUser);
+            }
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             User currentUser = new User();
-        //             currentUser.Id = reader["Id"].ToString();
-        //             currentUser.Name = reader["Name"].ToString();
-        //             currentUser.UserChannel = channel;
-        //             results.Add(currentUser);
-        //         }
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        //     finally
-        //     {
-        //         myConnection.Close();
-        //     }
-        // }
-
-        return results;
+            pool.close();
+            sql.close();
+            return results;
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
@@ -151,47 +135,30 @@ export class ReviewDao {
      * @param size The sizeof the review.
      * @param users The list of users that will have the item assigned.
      */
-    public assign(channel: Channel, size: EnumShirtSize, users: User[]): Map<User, EnumDaoResults> {
-        const result = new Map<User, EnumDaoResults>();
+    public async assign(channel: Channel, size: EnumShirtSize, users: User[]): Promise<Map<User, EnumDaoResults>> {
+        const results = new Map<User, EnumDaoResults>();
+        try {
+            // TODO: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
+            // foreach(User user in users) this can be changed when this is transformed into a REST API call
+            for(const user of users) {
+                const pool = await sql.connect(Constants.SERVER_CONFIG);
+                const data = await pool.request()
+                    .input('channelId', sql.NVarChar, '19:feca88094f7e44cdbdd0e98de4a7bd51@thread.skype')
+                    .input('rankIncrement', sql.Float, 3)
+                    .input('userId', sql.NVarChar, '29:1G1P0LhPNI4AOEPfqqdMfQD9mbAuDAa2Ded04zvtg8jDWwrjYogGEqTSliDGsU_Oswi2Wpj_TT-jl_aEuSKTkrQ')
+                    .output('result', sql.Int)
+                    .execute('usp_Assign');
 
-        // // .NET Core 1.1 does not support datatables so it is the easiest to do this way.
-        // foreach(User user in users)
-        // {
-        //     using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        //     {
-        //         try
-        //         {
-        //             SqlCommand sqlCmd = new SqlCommand();
-        //             sqlCmd.CommandType = CommandType.StoredProcedure;
-        //             sqlCmd.CommandText = "usp_Assign";
-        //             sqlCmd.Connection = myConnection;
-        //             sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@rankIncrement", System.Data.SqlDbType.Float);
-        //             sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@result", System.Data.SqlDbType.Int);
+                results.set(user, data.parameters.result);
 
-        //             sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //             sqlCmd.Parameters["@userId"].Value = user.Id;
-        //             sqlCmd.Parameters["@rankIncrement"].Value = (int)size;
-
-        //             sqlCmd.Parameters["@result"].Direction = ParameterDirection.Output;
-
-        //             myConnection.Open();
-        //             sqlCmd.ExecuteNonQuery();
-
-        //             EnumDaoResults recordResult = (EnumDaoResults)Convert.ToInt32(sqlCmd.Parameters["@result"].Value.ToString());
-        //             result.Add(user, recordResult);
-
-        //             myConnection.Close();
-        //         }
-        //         catch (Exception)
-        //         {
-        //             throw;
-        //         }
-        //     }
-        // }
-
-        return result;
+                pool.close();
+                sql.close();
+            }
+            return results;
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 
     /**

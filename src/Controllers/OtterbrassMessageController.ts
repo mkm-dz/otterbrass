@@ -61,7 +61,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
      */
     public async assign(activity: Activity, size: EnumShirtSize): Promise<User[] | null> {
         if (!activity) {
-            return Promise.resolve(null);
+            return null;
         }
 
         let usersAdded: string = '';
@@ -69,8 +69,12 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
+        if(activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return null;
+        }
 
         // Getting the mentions
         const entities = activity.entities;
@@ -84,7 +88,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         const reviewDao = new ReviewDao();
-        const results: Map<User, EnumDaoResults> = reviewDao.assign(channel, size, users);
+        const results: Map<User, EnumDaoResults> = await reviewDao.assign(channel, size, users);
 
         for (const [key, value] of results) {
             switch (value) {
@@ -285,7 +289,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             case EnumRandomOperations.GetChannelRandomness:
                 {
                     const result = reviewDao.getChannelRandomness(channel);
-                    const users = this.getRandomUsers(activity);
+                    const users = await this.getRandomUsers(activity);
                     if (result && result.randomness && users) {
                         let userNames = '';
                         let count = 1;
@@ -487,7 +491,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
     }
 
-    public getRandomUsers(activity: Activity) {
+    public async getRandomUsers(activity: Activity) {
         if (!activity) {
             return null;
         }
@@ -500,7 +504,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         channel.id = channelData.teamsChannelId;
 
-        const users = reviewDao.getNextRandomUsers(channel);
+        const users = await reviewDao.getNextRandomUsers(channel);
         return users;
     }
 
