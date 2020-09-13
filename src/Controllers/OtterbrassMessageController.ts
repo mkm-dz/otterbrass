@@ -288,7 +288,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         switch (randomOperation) {
             case EnumRandomOperations.GetChannelRandomness:
                 {
-                    const result = reviewDao.getChannelRandomness(channel);
+                    const result = await reviewDao.getChannelRandomness(channel);
                     const users = await this.getRandomUsers(activity);
                     if (result && result.randomness && users) {
                         let userNames = '';
@@ -529,7 +529,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         // We use a number between 0 and 100 (inclusive) and if that number is less than the 
         // randomness level for the channel, we continue, otherwise we return and finish this call.
         const reviewDao = new ReviewDao();
-        channel = reviewDao.getChannelRandomness(channel)
+        channel = await reviewDao.getChannelRandomness(channel)
         if (!channel || !channel.randomness) {
             return;
         }

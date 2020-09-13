@@ -13,9 +13,11 @@ import { Constants } from '../Common/Constants';
 export class CommonMessagesController {
     private static _myLazyController: CommonMessagesController;
     private context: TurnContext;
+    private channelControllerInstance: ChannelControllersInterface;
 
     private constructor(context: TurnContext) {
         this.context = context;
+        this.channelControllerInstance = TeamsChannelController.instance(this.context);
     }
 
     private static readonly myLazyController = (context: TurnContext) => {
@@ -26,8 +28,6 @@ export class CommonMessagesController {
         CommonMessagesController._myLazyController.context = context;
         return CommonMessagesController._myLazyController;
     };
-
-    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance(this.context);
 
     /**
      * Gets a singleton instance of the CommonMessagesController class.
@@ -112,7 +112,7 @@ export class CommonMessagesController {
         sentByUser.userChannel = channel;
 
         const reviewDao = new ReviewDao();
-        const user = reviewDao.nextInLine(channel, size, sentByUser);
+        const user = await reviewDao.nextInLine(channel, size, sentByUser);
         if (user && user.id && user.name) {
             const channelAccount: ChannelAccount = {
                 id: user.id,
