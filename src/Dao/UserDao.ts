@@ -109,38 +109,28 @@ export class UserDao {
      * @param Channel The channel associated.
      * @param channel the list of users that OOF
      */
-    public getOofUsers(channel: Channel): User[] {
+    public async getOofUsers(channel: Channel): Promise<User[]> {
         const results: User[] = [];
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetOofUsers";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .execute('usp_GetOofUsers');
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
+            for (const item of data.recordset) {
+                const currentUser = new User();
+                currentUser.id = item.id;
+                currentUser.name = item.name;
+                currentUser.userChannel = channel;
+                results.push(currentUser);
+            }
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             User currentUser = new User();
-        //             currentUser.Id = reader["Id"].ToString();
-        //             currentUser.Name = reader["Name"].ToString();
-        //             currentUser.UserChannel = channel;
-        //             results.Add(currentUser);
-        //         }
-
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
 
         return results;
     }
@@ -149,61 +139,47 @@ export class UserDao {
      * Adds a user to the Random Table
      * @param user The user that will be added.
      */
-    public addRandom(user: User) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_AddUserRandom";
-        //         sqlCmd.Connection = myConnection;
+    public async addRandom(user: User) {
+        try {
+            if(!user.userChannel || !user.userChannel.id) {
+                // TODO: Log exception gracefully.
+                throw new Error('Could not add user because a channel was not provided.')
+            }
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, user.userChannel.id)
+                .input('userId', sql.NVarChar, user.id)
+                .execute('usp_AddUserRandom');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-
-        //         sqlCmd.Parameters["@channelId"].Value = user.UserChannel.Id;
-        //         sqlCmd.Parameters["@userId"].Value = user.Id;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
      * Remove a user to the Random Table
      * @param user The user that will be added.
      */
-    public removeRandom(user: User) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_RemoveUserRandom";
-        //         sqlCmd.Connection = myConnection;
+    public async removeRandom(user: User) {
+        try {
+            if(!user.userChannel || !user.userChannel.id) {
+                // TODO: Log exception gracefully.
+                throw new Error('Could not add user because a channel was not provided.')
+            }
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, user.userChannel.id)
+                .input('userId', sql.NVarChar, user.id)
+                .execute('usp_RemoveUserRandom');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-
-        //         sqlCmd.Parameters["@channelId"].Value = user.UserChannel.Id;
-        //         sqlCmd.Parameters["@userId"].Value = user.Id;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // TODO: handle error gracefully.
+            throw error;
+        }
     }
 }
