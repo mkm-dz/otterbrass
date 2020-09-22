@@ -70,6 +70,10 @@ export class CommonMessagesController {
         let replyMsg = '';
         if (users) {
             for (const user of users) {
+                if (!user) {
+                    continue;
+                }
+
                 // We skip ourselves.
                 if (Utilities.filterOtterBrassUser(user)) {
                     continue;

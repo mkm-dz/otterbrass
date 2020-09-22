@@ -439,16 +439,23 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         let replyMsg = '';
         const reviewDao = new ReviewDao();
-        const users = reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
+        const users = await reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
 
         if (users) {
-            // TODO: verify this logic as it changed when migrated.
-            // User user = users.Where(currentUser =>
-            //     currentUser.Name.Equals(name.Trim(), StringComparison.CurrentCultureIgnoreCase)).First();
-            // replyMsg += string.Format(BotMessages.USER_REMOVE_SUCCEEDED, user.Name);
-            // user.UserChannel = channel;
-            // UserDao userDao = new UserDao();
-            // userDao.RemoveUser(user);
+            const filteredUsers = users.filter(currentUser => {
+                if (currentUser.name === name) {
+                    return currentUser;
+                }
+            })
+
+            if (filteredUsers.length > 0 && filteredUsers[0]) {
+                const user = filteredUsers[0];
+                replyMsg +=
+                    BotMessages.USER_REMOVE_SUCCEEDED.replace('{0}', (user.name || 'ERROR GETTING THE USER NAME'));
+                user.userChannel = channel;
+                const userDao = new UserDao();
+                await userDao.removeUser(user);
+            }
         }
 
         if (!replyMsg) {
