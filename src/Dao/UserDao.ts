@@ -17,7 +17,7 @@ export class UserDao {
     public async addUser(user: User) {
         try {
             if(!user.userChannel || !user.userChannel.id) {
-                // TODO: Log exception gracefully.
+                // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -32,7 +32,7 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -40,7 +40,7 @@ export class UserDao {
     public async removeUser(user: User) {
         try {
             if(!user.userChannel || !user.userChannel.id) {
-                // TODO: Log exception gracefully.
+                // #2: Log exception gracefully.
                 throw new Error('Could not remove user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -54,7 +54,7 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -79,7 +79,7 @@ export class UserDao {
                 {
 
                     if (!user.userChannel || !user.userChannel.id) {
-                        // TODO: Log exception gracefully.
+                        // #2: Log exception gracefully.
                         throw new Error('Could not remove user because a channel was not provided.')
                     }
                     const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -97,7 +97,7 @@ export class UserDao {
                 }
             }
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
 
@@ -128,7 +128,7 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
 
@@ -142,7 +142,7 @@ export class UserDao {
     public async addRandom(user: User) {
         try {
             if(!user.userChannel || !user.userChannel.id) {
-                // TODO: Log exception gracefully.
+                // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -154,7 +154,7 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -166,7 +166,7 @@ export class UserDao {
     public async removeRandom(user: User) {
         try {
             if(!user.userChannel || !user.userChannel.id) {
-                // TODO: Log exception gracefully.
+                // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -178,7 +178,7 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }

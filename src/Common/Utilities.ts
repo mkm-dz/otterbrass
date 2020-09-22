@@ -22,7 +22,7 @@ export class Utilities {
             return result;
         }
         catch (error) {
-            // TODO: Implement a good exception handling system.
+            // #2: Implement a good exception handling system.
             throw error;
         }
     }
@@ -145,7 +145,7 @@ export class Utilities {
             }
         }
         catch (error) {
-            // TODO: Implement a good exception handling system.
+            // #2: Implement a good exception handling system.
             throw error;
         }
     }

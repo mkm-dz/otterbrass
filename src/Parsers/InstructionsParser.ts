@@ -78,7 +78,7 @@ export class InstructionsParser {
             }
         }
         catch (error) {
-            // TODO: handle this exception properly
+            // #2: handle this exception properly
             throw error;
         }
     }

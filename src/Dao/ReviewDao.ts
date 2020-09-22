@@ -45,7 +45,7 @@ export class ReviewDao {
             sql.close();
             return user;
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -76,7 +76,7 @@ export class ReviewDao {
             sql.close();
             return result;
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -106,7 +106,7 @@ export class ReviewDao {
             sql.close();
             return results;
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -138,7 +138,7 @@ export class ReviewDao {
             }
             return results;
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -159,7 +159,7 @@ export class ReviewDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
@@ -199,7 +199,7 @@ export class ReviewDao {
             channel.randomness = channelRandomness;
             return channel;
         } catch (error) {
-            // TODO: handle error gracefully.
+            // #2: handle error gracefully.
             throw error;
         }
     }
