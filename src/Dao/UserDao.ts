@@ -72,7 +72,7 @@ export class UserDao {
         users: User[]): Promise<Map<User, EnumDaoResults>> {
         const result = new Map<User, EnumDaoResults>();
 
-        // TODO: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
+        // #3: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
         // foreach(User user in users) this can be changed when this is transformed into a REST API call
         try {
             for (const user of users) {

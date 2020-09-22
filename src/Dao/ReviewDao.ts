@@ -120,7 +120,7 @@ export class ReviewDao {
     public async assign(channel: Channel, size: EnumShirtSize, users: User[]): Promise<Map<User, EnumDaoResults>> {
         const results = new Map<User, EnumDaoResults>();
         try {
-            // TODO: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
+            // #3: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
             // foreach(User user in users) this can be changed when this is transformed into a REST API call
             for(const user of users) {
                 const pool = await sql.connect(Constants.SERVER_CONFIG);
