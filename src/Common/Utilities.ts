@@ -1,4 +1,4 @@
-import { Activity, Entity } from 'botbuilder';
+import { Activity, Entity, Mention } from 'botbuilder';
 import { User } from '../Models/User';
 import { Constants } from './Constants';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
@@ -50,29 +50,26 @@ export class Utilities {
      * @param removeOtterBrass If otterbrass is in the userlist and if it needs to be removed.
      * @return that contains the list of users from the entities.
      */
-    static CreateUsersFromModel(entities: Entity[] | undefined, removeOtterBrass: boolean): User[] | null {
+    static CreateUsersFromModel(entities: Entity[] | undefined, removeOtterBrass: boolean): (User | null)[] | null {
         if (!entities) {
             return null;
         }
 
-        // TODO: Migrate this LINQ logic
-        // IEnumerable<User> Users =
-        // from item in entities
-        // where Constants.MENTION.Equals(item.Type, StringComparison.OrdinalIgnoreCase)
-        // select new User
-        // {
-        //     Id = item.Properties["mentioned"]["id"].Value<string>(),
-        //     Name = item.Properties["mentioned"]["name"].Value<string>()
-        // };
+        const users = entities.map((item) => {
+            if (Constants.MENTION === item.type) {
+                const user = new User();
+                const mention = item as Mention;
+                user.id = mention.mentioned.id;
+                user.name = mention.mentioned.name;
+                if (Utilities.filterOtterBrassUser(user)) {
+                    return user;
+                }
+            }
 
-        // if (removeOtterBrass && null != Users)
-        // {
-        //     return Users.Where<User>(x => !Utilities.FilterOtterBrassUser(x));
-        // }
+            return null;
+        });
 
-        // return Users;
-
-        return null;
+        return users;
     }
 
     /**
