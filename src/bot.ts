@@ -19,7 +19,7 @@ export class EchoBot extends ActivityHandler {
         });
 
         this.onMembersAdded(async (context, next) => {
-            if(!context.activity.membersAdded){
+            if (!context.activity.membersAdded){
                 return ;
             }
 

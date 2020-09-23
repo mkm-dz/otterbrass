@@ -13,9 +13,11 @@ import { Constants } from '../Common/Constants';
 export class CommonMessagesController {
     private static _myLazyController: CommonMessagesController;
     private context: TurnContext;
+    private channelControllerInstance: ChannelControllersInterface;
 
     private constructor(context: TurnContext) {
         this.context = context;
+        this.channelControllerInstance = TeamsChannelController.instance(this.context);
     }
 
     private static readonly myLazyController = (context: TurnContext) => {
@@ -26,8 +28,6 @@ export class CommonMessagesController {
         CommonMessagesController._myLazyController.context = context;
         return CommonMessagesController._myLazyController;
     };
-
-    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance(this.context);
 
     /**
      * Gets a singleton instance of the CommonMessagesController class.
@@ -56,10 +56,10 @@ export class CommonMessagesController {
         const addSelfPattern = '(.*)(\\[)(add)(\\])(.*)(\\[)(self)(\\])(.*)';
         const userSelf = Utilities.GetUserFromRegex(addSelfPattern, activity.text, activity.from.name, activity.from.id);
 
-        if (null != userSelf) {
+        if (null !== userSelf) {
             const tempList = new Array<User>();
             tempList.push(userSelf);
-            if (null == users) {
+            if (null === users) {
                 users = new Array<User>();
             }
 
@@ -70,6 +70,10 @@ export class CommonMessagesController {
         let replyMsg = '';
         if (users) {
             for (const user of users) {
+                if (!user) {
+                    continue;
+                }
+
                 // We skip ourselves.
                 if (Utilities.filterOtterBrassUser(user)) {
                     continue;
@@ -78,7 +82,8 @@ export class CommonMessagesController {
                 replyMsg += user.name + ', ';
                 user.userChannel = channel;
                 const userDao = new UserDao();
-                userDao.addUser(user);
+                // TODO: Move this to a promise array and complete using Promise.all.
+                await userDao.addUser(user);
             }
         }
 
@@ -112,7 +117,7 @@ export class CommonMessagesController {
         sentByUser.userChannel = channel;
 
         const reviewDao = new ReviewDao();
-        const user = reviewDao.nextInLine(channel, size, sentByUser);
+        const user = await reviewDao.nextInLine(channel, size, sentByUser);
         if (user && user.id && user.name) {
             const channelAccount: ChannelAccount = {
                 id: user.id,
@@ -129,11 +134,11 @@ export class CommonMessagesController {
             await this.channelControllerInstance.createReplyWithMention(BotMessages.NEXT_IN_LINE.replace('{0}', user.name), activity, mention);
             return user;
         }
-        else {
+
             // For some reason the user was not found in the message, most likely something wrong on our side
             // or all the users are OOF.
             await this.channelControllerInstance.createReply(BotMessages.INCORRECT_USER_SPECIFIED, activity);
             return null;
-        }
+
     }
 }

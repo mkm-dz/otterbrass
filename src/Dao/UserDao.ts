@@ -2,6 +2,9 @@ import { User } from '../Models/User';
 import { Channel } from '../Models/Channel';
 import { EnumOofStatus } from '../Enums/EnumOofStatus';
 import { EnumDaoResults } from '../Enums/EnumDaoResults';
+import { Constants } from '../Common/Constants';
+
+const sql = require('mssql');
 
 /**
  * Data access object used in the communication with the user database.
@@ -11,70 +14,49 @@ export class UserDao {
      * Adds a user to the database.
      * @param user The user that will be added.
      */
-    public addUser(user: User) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_AddUser";
-        //         sqlCmd.Connection = myConnection;
+    public async addUser(user: User) {
+        try {
+            if (!user.userChannel || !user.userChannel.id) {
+                // #2: Log exception gracefully.
+                throw new Error('Could not add user because a channel was not provided.')
+            }
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, user.userChannel.id)
+                .input('channelName', sql.NVarChar, user.userChannel.name)
+                .input('userId', sql.NVarChar, user.id)
+                .input('userName', sql.NVarChar, user.name)
+                .input('randomLevel', sql.Int, Constants.DEFAULT_RANDOMNESS_LEVEL)
+                .execute('usp_AddUser');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@channelName", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userName", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@randomLevel", System.Data.SqlDbType.Int);
-
-        //         sqlCmd.Parameters["@channelId"].Value = user.UserChannel.Id;
-        //         sqlCmd.Parameters["@channelName"].Value = user.UserChannel.Name;
-        //         sqlCmd.Parameters["@userId"].Value = user.Id;
-        //         sqlCmd.Parameters["@userName"].Value = user.Name;
-
-        //         // default level for randomness
-        //         sqlCmd.Parameters["@randomLevel"].Value = Constants.DEFAULT_RANDOMNESS_LEVEL;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
-    public removeUser(user: User) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_RemoveUser";
-        //         sqlCmd.Connection = myConnection;
+    public async removeUser(user: User) {
+        try {
+            if (!user.userChannel || !user.userChannel.id) {
+                // #2: Log exception gracefully.
+                throw new Error('Could not remove user because a channel was not provided.')
+            }
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, user.userChannel.id)
+                .input('channelName', sql.NVarChar, user.userChannel.name)
+                .input('userId', sql.NVarChar, user.id)
+                .input('userName', sql.NVarChar, user.name)
+                .execute('usp_RemoveUser');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@channelName", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userName", System.Data.SqlDbType.NVarChar, 255);
-
-        //         sqlCmd.Parameters["@channelId"].Value = user.UserChannel.Id;
-        //         sqlCmd.Parameters["@channelName"].Value = user.UserChannel.Name;
-        //         sqlCmd.Parameters["@userId"].Value = user.Id;
-        //         sqlCmd.Parameters["@userName"].Value = user.Name;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
@@ -85,49 +67,39 @@ export class UserDao {
      * @return A <see cref="Dictionary{User, EnumDaoResults}"/> that represents the user and the result
      *   from that operation.
      */
-    public setOofStatus(channel: Channel,
+    public async setOofStatus(channel: Channel,
         oofStatus: EnumOofStatus,
-        users: User[]): Map<User, EnumDaoResults> {
+        users: User[]): Promise<Map<User, EnumDaoResults>> {
         const result = new Map<User, EnumDaoResults>();
 
-        // .NET Core 1.1 does not support datatables so it is the easiest to do this way.
-        // foreach (User user in users)
-        // {
-        //     using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        //     {
-        //         try
-        //         {
-        //             SqlCommand sqlCmd = new SqlCommand();
-        //             sqlCmd.CommandType = CommandType.StoredProcedure;
-        //             sqlCmd.CommandText = "usp_SetOof";
-        //             sqlCmd.Connection = myConnection;
-        //             sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@oofStatus", System.Data.SqlDbType.Int, 255);
-        //             sqlCmd.Parameters.Add("@result", System.Data.SqlDbType.Int);
+        // #3: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
+        // foreach(User user in users) this can be changed when this is transformed into a REST API call
+        try {
+            for (const user of users) {
+                {
 
-        //             sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //             sqlCmd.Parameters["@userId"].Value = user.Id;
-        //             sqlCmd.Parameters["@oofStatus"].Value = (int)oofStatus;
+                    if (!user.userChannel || !user.userChannel.id) {
+                        // #2: Log exception gracefully.
+                        throw new Error('Could not remove user because a channel was not provided.')
+                    }
+                    const pool = await sql.connect(Constants.SERVER_CONFIG);
+                    const data = await pool.request()
+                        .input('channelId', sql.NVarChar, user.userChannel.id)
+                        .input('userId', sql.NVarChar, user.id)
+                        .input('oofStatus', sql.Int, user.name)
+                        .output('result', sql.Int, user.userChannel.name)
+                        .execute('usp_SetOof');
 
-        //             sqlCmd.Parameters["@result"].Direction = ParameterDirection.Output;
+                    pool.close();
+                    sql.close();
 
-        //             myConnection.Open();
-        //             sqlCmd.ExecuteNonQuery();
-
-        //             EnumDaoResults recordResult = (EnumDaoResults)Convert.ToInt32(sqlCmd.Parameters["@result"].Value.ToString());
-        //             result.Add(user, recordResult);
-        //         }
-        //         catch (Exception)
-        //         {
-        //             throw;
-        //         }
-        //         finally
-        //         {
-        //             myConnection.Close();
-        //         }
-        //     }
-        // }
+                    result.set(user, data.parameters.result);
+                }
+            }
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
 
         return result;
     }
@@ -137,38 +109,28 @@ export class UserDao {
      * @param Channel The channel associated.
      * @param channel the list of users that OOF
      */
-    public getOofUsers(channel: Channel): User[] {
+    public async getOofUsers(channel: Channel): Promise<User[]> {
         const results: User[] = [];
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetOofUsers";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .execute('usp_GetOofUsers');
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
+            for (const item of data.recordset) {
+                const currentUser = new User();
+                currentUser.id = item.id;
+                currentUser.name = item.name;
+                currentUser.userChannel = channel;
+                results.push(currentUser);
+            }
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             User currentUser = new User();
-        //             currentUser.Id = reader["Id"].ToString();
-        //             currentUser.Name = reader["Name"].ToString();
-        //             currentUser.UserChannel = channel;
-        //             results.Add(currentUser);
-        //         }
-
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
 
         return results;
     }
@@ -177,61 +139,47 @@ export class UserDao {
      * Adds a user to the Random Table
      * @param user The user that will be added.
      */
-    public addRandom(user: User) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_AddUserRandom";
-        //         sqlCmd.Connection = myConnection;
+    public async addRandom(user: User) {
+        try {
+            if (!user.userChannel || !user.userChannel.id) {
+                // #2: Log exception gracefully.
+                throw new Error('Could not add user because a channel was not provided.')
+            }
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, user.userChannel.id)
+                .input('userId', sql.NVarChar, user.id)
+                .execute('usp_AddUserRandom');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-
-        //         sqlCmd.Parameters["@channelId"].Value = user.UserChannel.Id;
-        //         sqlCmd.Parameters["@userId"].Value = user.Id;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
      * Remove a user to the Random Table
      * @param user The user that will be added.
      */
-    public removeRandom(user: User) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_RemoveUserRandom";
-        //         sqlCmd.Connection = myConnection;
+    public async removeRandom(user: User) {
+        try {
+            if (!user.userChannel || !user.userChannel.id) {
+                // #2: Log exception gracefully.
+                throw new Error('Could not add user because a channel was not provided.')
+            }
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, user.userChannel.id)
+                .input('userId', sql.NVarChar, user.id)
+                .execute('usp_RemoveUserRandom');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-
-        //         sqlCmd.Parameters["@channelId"].Value = user.UserChannel.Id;
-        //         sqlCmd.Parameters["@userId"].Value = user.Id;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 }

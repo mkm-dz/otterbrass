@@ -2,7 +2,7 @@ import { MessageControllerInterface } from '../Interfaces/MessageControllerInter
 import { ChannelControllersInterface } from '../Interfaces/ChannelControllersInterface';
 import { TeamsChannelController } from './TeamsChannelController';
 import { CommonMessagesController } from './CommonMessageController';
-import { Activity, TurnContext } from 'botbuilder';
+import { Activity, TurnContext, Mention} from 'botbuilder';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { User } from '../Models/User';
 import { Channel } from '../Models/Channel';
@@ -61,16 +61,20 @@ export class OtterBrassMessageController implements MessageControllerInterface {
      */
     public async assign(activity: Activity, size: EnumShirtSize): Promise<User[] | null> {
         if (!activity) {
-            return Promise.resolve(null);
+            return null;
         }
 
-        let usersAdded: string = '';
-        let usersMissing: string = '';
+        let usersAdded = '';
+        let usersMissing = '';
 
         // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return null;
+        }
 
         // Getting the mentions
         const entities = activity.entities;
@@ -84,7 +88,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         const reviewDao = new ReviewDao();
-        const results: Map<User, EnumDaoResults> = reviewDao.assign(channel, size, users);
+        const results: Map<User, EnumDaoResults> = await reviewDao.assign(channel, size, users);
 
         for (const [key, value] of results) {
             switch (value) {
@@ -145,7 +149,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         const userSelf =
             Utilities.GetUserFromRegex(oofSelfPattern, activity.text, activity.from.name, activity.from.id);
 
-        if (null != userSelf) {
+        if (null !== userSelf) {
             const tempList: User[] = [];
             tempList.push(userSelf);
             if (!users) {
@@ -162,7 +166,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         const userDao = new UserDao();
-        const results: Map<User, EnumDaoResults> = userDao.setOofStatus(channel, oofStatus, users);
+        const results: Map<User, EnumDaoResults> = await userDao.setOofStatus(channel, oofStatus, users);
 
         for (const [key, value] of results) {
             switch (value) {
@@ -240,13 +244,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         switch (randomStatus) {
             case EnumRandomOperations.Add:
                 {
-                    userDao.addRandom(currentUser);
+                    await userDao.addRandom(currentUser);
                     replyMsg += BotMessages.RANDOM_CORRECT.replace('{0}', currentUser.name);
                     break;
                 }
             case EnumRandomOperations.Remove:
                 {
-                    userDao.removeRandom(currentUser);
+                    await userDao.removeRandom(currentUser);
                     replyMsg += BotMessages.RANDOM_REMOVE.replace('{0}', currentUser.name);
                     break;
                 }
@@ -284,8 +288,8 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         switch (randomOperation) {
             case EnumRandomOperations.GetChannelRandomness:
                 {
-                    const result = reviewDao.getChannelRandomness(channel);
-                    const users = this.getRandomUsers(activity);
+                    const result = await reviewDao.getChannelRandomness(channel);
+                    const users = await this.getRandomUsers(activity);
                     if (result && result.randomness && users) {
                         let userNames = '';
                         let count = 1;
@@ -342,11 +346,11 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         channel.name = activity.channelId;
 
         const userDao = new UserDao();
-        const results = userDao.getOofUsers(channel);
+        const results = await userDao.getOofUsers(channel);
 
         let userNames = '';
         let count = 1;
-        if (null != results && results.length > 0) {
+        if (null !== results && results.length > 0) {
             for (const user of results) {
                 userNames += `${count}.-${user.name}<br />`;
                 count++;
@@ -411,11 +415,11 @@ export class OtterBrassMessageController implements MessageControllerInterface {
      * @param activity The activity associated with the request.
      */
     public async removeUserWithName(activity: Activity) {
-        if (null == activity) {
+        if (null === activity) {
             return;
         }
 
-        const removePatternWithUser = `(.*)(\\[)(remove)(\\])(.*)(\\[)(.*)(\\])(.*)`;
+        const removePatternWithUser = '(.*)(\\[)(remove)(\\])(.*)(\\[)(.*)(\\])(.*)';
         let name = Utilities.getGroupFromRegex(removePatternWithUser, activity.text, 7);
         if (name) {
             return;
@@ -435,16 +439,23 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         let replyMsg = '';
         const reviewDao = new ReviewDao();
-        const users = reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
+        const users = await reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
 
         if (users) {
-            // TODO: verify this logic as it changed when migrated.
-            // User user = users.Where(currentUser =>
-            //     currentUser.Name.Equals(name.Trim(), StringComparison.CurrentCultureIgnoreCase)).First();
-            // replyMsg += string.Format(BotMessages.USER_REMOVE_SUCCEEDED, user.Name);
-            // user.UserChannel = channel;
-            // UserDao userDao = new UserDao();
-            // userDao.RemoveUser(user);
+            const filteredUsers = users.filter(currentUser => {
+                if (currentUser.name === name) {
+                    return currentUser;
+                }
+            })
+
+            if (filteredUsers.length > 0 && filteredUsers[0]) {
+                const user = filteredUsers[0];
+                replyMsg +=
+                    BotMessages.USER_REMOVE_SUCCEEDED.replace('{0}', (user.name || 'ERROR GETTING THE USER NAME'));
+                user.userChannel = channel;
+                const userDao = new UserDao();
+                await userDao.removeUser(user);
+            }
         }
 
         if (!replyMsg) {
@@ -475,7 +486,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         const users = await reviewDao.nextUsers(channel, 3);
         let userNames = '';
         let count = 1;
-        if (null != users && users.length > 0) {
+        if (null !== users && users.length > 0) {
             for (const user of users) {
                 userNames += `${count}.-${user.name}<br />`;
                 count++;
@@ -487,7 +498,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
     }
 
-    public getRandomUsers(activity: Activity) {
+    public async getRandomUsers(activity: Activity) {
         if (!activity) {
             return null;
         }
@@ -500,7 +511,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         channel.id = channelData.teamsChannelId;
 
-        const users = reviewDao.getNextRandomUsers(channel);
+        const users = await reviewDao.getNextRandomUsers(channel);
         return users;
     }
 
@@ -522,10 +533,10 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         sentByUser.userChannel = channel;
 
         // We need to decide whether we will include a random user, to do this we use a simple rule:
-        // We use a number between 0 and 100 (inclusive) and if that number is less than the 
+        // We use a number between 0 and 100 (inclusive) and if that number is less than the
         // randomness level for the channel, we continue, otherwise we return and finish this call.
         const reviewDao = new ReviewDao();
-        channel = reviewDao.getChannelRandomness(channel)
+        channel = await reviewDao.getChannelRandomness(channel)
         if (!channel || !channel.randomness) {
             return;
         }
@@ -534,46 +545,50 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        const users = this.getRandomUsers(activity);
+        const users = await this.getRandomUsers(activity);
+        if (users) {
+            // We need to take out ourselves from the randomList
+            let filteredList = users.filter(user => {
+                if (user.id !== sentByUser.id && user.name !== sentByUser.name) {
+                    return user
+                }
+            });
 
-        // TODO: verify this logic as it changed when migrated.
-        // We need to take out ourselves from the randomList
-        // IEnumerable<User> filteredList = users.Where(user => !user.Id.Equals(sentByUser.Id, StringComparison.InvariantCultureIgnoreCase) &&
-        //                                         !user.Name.Equals(sentByUser.Name, StringComparison.InvariantCultureIgnoreCase)).ToList<User>();
+            // We also need to take out any excluded users
+            if (excludedUsers) {
+                filteredList = filteredList.filter(user => {
+                    for (const excludedUser of excludedUsers){
+                        if (user.id !== excludedUser.id && user.name !== excludedUser.name) {
+                            return user;
+                        }
+                    }
+                });
+            }
 
-        // We also need to take out any excluded users
-        if (excludedUsers) {
-            // TODO: verify this logic as it changed when migrated.
-            // filteredList = filteredList.Except(excludedUsers, new UserComparer());
+            // We need to choose the user.
+            // Get a random number between 0 and the max length of the array.
+            let resultUser = null;
+            const index = Math.random() * filteredList.length;
+            if (filteredList.length > 0) {
+                resultUser = filteredList[index];
+            }
+
+            if (resultUser) {
+                const mentioned = {
+                    id: resultUser.id,
+                    name: resultUser.name
+                };
+
+                const mention = {
+                    text: `<at> ${resultUser.name} </at>`,
+                    mentioned,
+                    type: Constants.MENTION
+                }
+
+                await reviewDao.assign(channel, shirtSize, [resultUser]);
+                await this.channelControllerInstance.createReplyWithMention(BotMessages.GET_NEXT_RANDOM.replace('{0}', (resultUser.name || 'ERROR GETTING NAME OF RANDOM USER')), activity, mention as Mention);
+            }
         }
-
-        // We need to choose the user.
-        // Get a random number between 0 and the max length of the array.
-        // let resultUser = null;
-        // const index = Math.random() * filteredList.Count();
-
-        // if (filteredList.Count() > 0) {
-        //     resultUser = filteredList.ElementAt(index);
-        // }
-
-        // if (resultUser) {
-        //     const mentioned = {
-        //         id: resultUser.id,
-        //         name: resultUser.name
-        //     };
-
-        //     const mention = {
-        //         text: `<at> ${resultUser.name} </at>`;
-        //         mentioned,
-        //         type: Constants.MENTION
-        //     }
-
-        //     // TODO: verify this logic as it changed when migrated.
-        //     const results = reviewDao.assign(channel, shirtSize, [resultUser]);
-        //     const test = await this.channelControllerInstance.createReplyWithMention(BotMessages.GET_NEXT_RANDOM.replace('{0}', resultUser.name), activity, mention);
-        // }
-
-        return;
     }
 
     /**
@@ -601,9 +616,9 @@ export class OtterBrassMessageController implements MessageControllerInterface {
                     if (n1 && n1.rank && n2 && n2.rank) {
                         // We want the list ordered from first to bottom.
                         return n2.rank - n1.rank
-                    } else {
-                        return -1
                     }
+                        return -1
+
                 });
 
                 for (const user of users) {

@@ -6,11 +6,11 @@
     "strict": true,
     "declaration": true,
     "target": "ES2018",
+    "outDir": "./dist",
     "module": "commonjs",
-    "outDir": "./lib",
     "rootDir": "./src",
     "sourceMap": true,
     "incremental": true,
-    "tsBuildInfoFile": "./lib/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   }
 }

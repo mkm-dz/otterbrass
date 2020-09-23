@@ -73,12 +73,12 @@ export class InstructionsParser {
             if (match) {
                 return EnumInstructions.ChannelRandomness;
             }
-            else {
+
                 return EnumInstructions.None;
-            }
+
         }
         catch (error) {
-            // TODO: handle this exception properly
+            // #2: handle this exception properly
             throw error;
         }
     }

@@ -16,56 +16,38 @@ export class ReviewDao {
      * @param size The size that will be used for the next user rank.
      * @param sentByUser The user that sent the request and that should not be included in the results.
      */
-    public nextInLine(channel: Channel, size: EnumShirtSize, sentByUser: User): User | null {
+    public async nextInLine(channel: Channel, size: EnumShirtSize, sentByUser: User): Promise<User | null> {
         if (!sentByUser || !sentByUser.id) {
             return null;
         }
 
-        const user: User | null = null;
+        let user: User | null = null;
 
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetNext";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@rankIncrement", System.Data.SqlDbType.Float);
-        //         sqlCmd.Parameters.Add("@sentByUserId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userName", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@ranking", System.Data.SqlDbType.NVarChar, 255);
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .input('rankIncrement', sql.Int, size)
+                .input('sentByUserId', sql.NVarChar, sentByUser.id)
+                .output('userName', sql.NVarChar)
+                .output('userId', sql.NVarChar)
+                .output('ranking', sql.NVarChar)
+                .execute('usp_GetNext');
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //         sqlCmd.Parameters["@rankIncrement"].Value = (int)size;
-        //         sqlCmd.Parameters["@sentByUserId"].Value = sentByUser.Id;
+            if (data.parameters.userId) {
+                user = new User();
+                user.id = data.parameters.userId;
+                user.name = data.parameters.userName;
+                user.rank = data.parameters.ranking;
+            }
 
-        //         sqlCmd.Parameters["@userName"].Direction = ParameterDirection.Output;
-        //         sqlCmd.Parameters["@userId"].Direction = ParameterDirection.Output;
-        //         sqlCmd.Parameters["@ranking"].Direction = ParameterDirection.Output;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-
-        //         if (!String.IsNullOrEmpty(sqlCmd.Parameters["@userId"].Value.ToString()))
-        //         {
-        //             user = new User();
-        //             user.UserChannel = channel;
-        //             user.Name = sqlCmd.Parameters["@userName"].Value.ToString();
-        //             user.Id = sqlCmd.Parameters["@userId"].Value.ToString();
-        //         }
-
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
-
-        return user;
+            pool.close();
+            sql.close();
+            return user;
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
@@ -75,74 +57,58 @@ export class ReviewDao {
      */
     public async nextUsers(channel: Channel, howMany: number): Promise<User[]> {
         const result: User[] = [];
-        async function execute() {
-            try {
-                const pool = await sql.connect(Constants.SERVER_CONFIG);
-                const data = await pool.request()
-                    .input('channelId', sql.NVarChar, channel.id)
-                    .input('howMany', sql.Int, howMany)
-                    .execute('usp_GetNextUsers');
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .input('howMany', sql.Int, howMany)
+                .execute('usp_GetNextUsers');
 
-                for (const item of data.recordset) {
-                    const currentUser = new User();
-                    currentUser.id = item.Id;
-                    currentUser.name = item.Name;
-                    currentUser.rank = item.Ranking;
-                    result.push(currentUser);
-                }
-
-                pool.close();
-                sql.close();
-                return result;
-            } catch (error) {
-                // TODO: handle error gracefully.
-                throw error;
+            for (const item of data.recordset) {
+                const currentUser = new User();
+                currentUser.id = item.Id;
+                currentUser.name = item.Name;
+                currentUser.rank = item.Ranking;
+                result.push(currentUser);
             }
-        }
 
-        return await execute();
+            pool.close();
+            sql.close();
+            return result;
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
      * Gets the next random user in line (without incrementing it's rank)
      * @param channel The channel associated.
      */
-    public getNextRandomUsers(channel: Channel): User[] {
+    public async getNextRandomUsers(channel: Channel): Promise<User[]> {
         const results: User[] = [];
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .execute('usp_GetRandomUsers');
 
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetRandomUsers";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
+            for (const item of data.recordset) {
+                const currentUser = new User();
+                currentUser.id = item.Id;
+                currentUser.name = item.Name;
+                currentUser.rank = item.Ranking;
+                currentUser.userChannel = channel;
+                results.push(currentUser);
+            }
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             User currentUser = new User();
-        //             currentUser.Id = reader["Id"].ToString();
-        //             currentUser.Name = reader["Name"].ToString();
-        //             currentUser.UserChannel = channel;
-        //             results.Add(currentUser);
-        //         }
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        //     finally
-        //     {
-        //         myConnection.Close();
-        //     }
-        // }
-
-        return results;
+            pool.close();
+            sql.close();
+            return results;
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
@@ -151,47 +117,31 @@ export class ReviewDao {
      * @param size The sizeof the review.
      * @param users The list of users that will have the item assigned.
      */
-    public assign(channel: Channel, size: EnumShirtSize, users: User[]): Map<User, EnumDaoResults> {
-        const result = new Map<User, EnumDaoResults>();
+    public async assign(channel: Channel, size: EnumShirtSize, users: User[]): Promise<Map<User, EnumDaoResults>> {
+        const results = new Map<User, EnumDaoResults>();
+        try {
+            // #3: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
+            // foreach(User user in users) this can be changed when this is transformed into a REST API call
+            for (const user of users) {
+                const pool = await sql.connect(Constants.SERVER_CONFIG);
+                const data = await pool.request()
+                    .input('channelId', sql.NVarChar, '19:feca88094f7e44cdbdd0e98de4a7bd51@thread.skype')
+                    .input('rankIncrement', sql.Float, 3)
+                    .input('userId', sql.NVarChar, '29:1G1P0LhPNI4AOEPfqqdMfQD9mbAuDAa2Ded04zvtg8jDWwrjYogGEqTSliDGsU_Oswi2Wpj_TT-jl_aEuSKTkrQ')
+                    .output('result', sql.Int)
+                    .execute('usp_Assign');
 
-        // // .NET Core 1.1 does not support datatables so it is the easiest to do this way.
-        // foreach(User user in users)
-        // {
-        //     using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        //     {
-        //         try
-        //         {
-        //             SqlCommand sqlCmd = new SqlCommand();
-        //             sqlCmd.CommandType = CommandType.StoredProcedure;
-        //             sqlCmd.CommandText = "usp_Assign";
-        //             sqlCmd.Connection = myConnection;
-        //             sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@rankIncrement", System.Data.SqlDbType.Float);
-        //             sqlCmd.Parameters.Add("@userId", System.Data.SqlDbType.NVarChar, 255);
-        //             sqlCmd.Parameters.Add("@result", System.Data.SqlDbType.Int);
+                results.set(user, data.parameters.result);
 
-        //             sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //             sqlCmd.Parameters["@userId"].Value = user.Id;
-        //             sqlCmd.Parameters["@rankIncrement"].Value = (int)size;
+                pool.close();
+                sql.close();
+            }
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
 
-        //             sqlCmd.Parameters["@result"].Direction = ParameterDirection.Output;
-
-        //             myConnection.Open();
-        //             sqlCmd.ExecuteNonQuery();
-
-        //             EnumDaoResults recordResult = (EnumDaoResults)Convert.ToInt32(sqlCmd.Parameters["@result"].Value.ToString());
-        //             result.Add(user, recordResult);
-
-        //             myConnection.Close();
-        //         }
-        //         catch (Exception)
-        //         {
-        //             throw;
-        //         }
-        //     }
-        // }
-
-        return result;
+        return results;
     }
 
     /**
@@ -199,31 +149,20 @@ export class ReviewDao {
      * @param channel The channel that will have the randomness set.
      * @param randomness The level of randomness assigned to the channel.
      */
-    public setChannelRandomness(channel: Channel, randomness: number) {
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_SetChannelRandomness";
-        //         sqlCmd.Connection = myConnection;
+    public async setChannelRandomness(channel: Channel, randomness: number) {
+        try {
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .input('randomLevel', sql.Int, randomness)
+                .execute('usp_SetChannelRandomness');
 
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
-        //         sqlCmd.Parameters.Add("@randomLevel", System.Data.SqlDbType.Int);
-
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
-        //         sqlCmd.Parameters["@randomLevel"].Value = randomness;
-
-        //         myConnection.Open();
-        //         sqlCmd.ExecuteNonQuery();
-        //         myConnection.Close();
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        // }
+            pool.close();
+            sql.close();
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 
     /**
@@ -231,52 +170,38 @@ export class ReviewDao {
      * @param channel A channel from which we want to retrieve the randomness level.</param>
      * <returns>A channel that contains the randomness level
      */
-    public getChannelRandomness(channel: Channel): Channel | null {
-        return null;
-        // if (!channel)
-        // {
-        //     return null;
-        // }
+    public async getChannelRandomness(channel: Channel): Promise<Channel | null> {
+        if (!channel)
+        {
+            return null;
+        }
 
-        // const results :User[] = [];
+        try {
+            let channelRandomness = -1;
+            const pool = await sql.connect(Constants.SERVER_CONFIG);
+            const data = await pool.request()
+                .input('channelId', sql.NVarChar, channel.id)
+                .execute('usp_GetChannelRandomness');
 
-        // using (SqlConnection myConnection = new SqlConnection(Constants.SERVER_STRING))
-        // {
-        //     try
-        //     {
-        //         int channelRandomness = -1;
-        //         SqlCommand sqlCmd = new SqlCommand();
-        //         sqlCmd.CommandType = CommandType.StoredProcedure;
-        //         sqlCmd.CommandText = "usp_GetChannelRandomness";
-        //         sqlCmd.Connection = myConnection;
-        //         sqlCmd.Parameters.Add("@channelId", System.Data.SqlDbType.NVarChar, 255);
+            for (const item of data.recordset) {
+                if (-1 === channelRandomness)
+                {
+                    channelRandomness = item.RandomLevel;
+                }
+                else if (channelRandomness !== item.RandomLevel)
+                {
+                    throw new Error('Channel randomness does not match all the values');
+                }
+            }
 
-        //         sqlCmd.Parameters["@channelId"].Value = channel.Id;
+            pool.close();
+            sql.close();
 
-        //         myConnection.Open();
-        //         SqlDataReader reader = sqlCmd.ExecuteReader();
-        //         while (reader.Read())
-        //         {
-        //             if(-1 == channelRandomness)
-        //             {
-        //                 channelRandomness = Convert.ToInt32(reader["RandomLevel"].ToString());
-        //             }
-        //             else if(channelRandomness != Convert.ToInt32(reader["RandomLevel"].ToString()))
-        //             {
-        //                 throw new Exception("Channel randomness does not match all the values");
-        //             }
-        //         }
-
-        //         channel.Randomness = channelRandomness;
-        //         return channel;
-        //     }
-        //     catch (Exception)
-        //     {
-        //         throw;
-        //     }
-        //     finally
-        //     {
-        //         myConnection.Close();
-        //     }
+            channel.randomness = channelRandomness;
+            return channel;
+        } catch (error) {
+            // #2: handle error gracefully.
+            throw error;
+        }
     }
 }
