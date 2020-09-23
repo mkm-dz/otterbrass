@@ -116,6 +116,26 @@
                         {
                             "name": "MicrosoftAppPassword",
                             "value": "[parameters('appSecret')]"
+                        },
+                        {
+                            "name": "SqlServerAddress",
+                            "value": "[parameters('sqlhost')]"
+                        },
+                        {
+                            "name": "SqlServerDatabase",
+                            "value": "[parameters('sqlDatabase')]"
+                        },
+                        {
+                            "name": "SqlServerPassword",
+                            "value": "[parameters('sqlSecret')]"
+                        },
+                        {
+                            "name": "SqlServerPort",
+                            "value": "[parameters('selPort')]"
+                        },
+                        {
+                            "name": "SqlServerUser",
+                            "value": "[parameters('sqlUser')]"
                         }
                     ],
                     "cors": {
