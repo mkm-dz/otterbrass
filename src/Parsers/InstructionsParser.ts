@@ -79,6 +79,7 @@ export class InstructionsParser {
         }
         catch (error) {
             // #2: handle this exception properly
+            console.error(error);
             throw error;
         }
     }

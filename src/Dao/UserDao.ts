@@ -33,6 +33,7 @@ export class UserDao {
             sql.close();
         } catch (error) {
             // #2: handle error gracefully.
+            console.error(error);
             throw error;
         }
     }
@@ -55,7 +56,7 @@ export class UserDao {
             sql.close();
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 
@@ -98,7 +99,7 @@ export class UserDao {
             }
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
 
         return result;
@@ -129,7 +130,7 @@ export class UserDao {
             sql.close();
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
 
         return results;
@@ -155,7 +156,7 @@ export class UserDao {
             sql.close();
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 
@@ -179,7 +180,7 @@ export class UserDao {
             sql.close();
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 }

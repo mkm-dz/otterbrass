@@ -46,6 +46,7 @@ export class ReviewDao {
             return user;
         } catch (error) {
             // #2: handle error gracefully.
+            console.error(error);
             throw error;
         }
     }
@@ -77,7 +78,7 @@ export class ReviewDao {
             return result;
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 
@@ -107,7 +108,7 @@ export class ReviewDao {
             return results;
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 
@@ -125,7 +126,7 @@ export class ReviewDao {
             for (const user of users) {
                 const pool = await sql.connect(Constants.SERVER_CONFIG);
                 const data = await pool.request()
-                    .input('channelId', sql.NVarChar, '19:feca88094f7e44cdbdd0e98de4a7bd51@thread.skype')
+                    .input('channelId', sql.NVarChar, channel.id)
                     .input('rankIncrement', sql.Float, 3)
                     .input('userId', sql.NVarChar, '29:1G1P0LhPNI4AOEPfqqdMfQD9mbAuDAa2Ded04zvtg8jDWwrjYogGEqTSliDGsU_Oswi2Wpj_TT-jl_aEuSKTkrQ')
                     .output('result', sql.Int)
@@ -138,7 +139,7 @@ export class ReviewDao {
             }
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
 
         return results;
@@ -161,7 +162,7 @@ export class ReviewDao {
             sql.close();
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 
@@ -201,7 +202,7 @@ export class ReviewDao {
             return channel;
         } catch (error) {
             // #2: handle error gracefully.
-            throw error;
+            console.error(error);throw error;
         }
     }
 }

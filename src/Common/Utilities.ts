@@ -23,6 +23,7 @@ export class Utilities {
         }
         catch (error) {
             // #2: Implement a good exception handling system.
+            console.error(error);
             throw error;
         }
     }
@@ -148,7 +149,7 @@ export class Utilities {
         }
         catch (error) {
             // #2: Implement a good exception handling system.
-            throw error;
+            console.error(error);throw error;
         }
     }
 
