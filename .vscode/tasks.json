@@ -1,0 +1,26 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "echoCommand": true,
+    "tasks": [
+        {
+            "command": "${workspaceRoot}/node_modules/.bin/webpack",
+            "args": [
+                "--dev-mode"
+            ],
+            "label": "webpack dev",
+            "group": "build",
+            "type": "shell"
+        },
+        {
+            "command": "${workspaceRoot}/node_modules/.bin/webpack",
+            "args": [
+                "--production-mode"
+            ],
+            "label": "webpack dist",
+            "group": "none",
+            "type":"shell"
+        }
+    ]
+}
