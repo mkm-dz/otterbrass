@@ -11,6 +11,6 @@
     "rootDir": "./src",
     "sourceMap": true,
     "incremental": true,
-    "tsBuildInfoFile": "./lib/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   }
 }
