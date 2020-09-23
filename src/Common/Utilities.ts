@@ -50,24 +50,29 @@ export class Utilities {
      * @param removeOtterBrass If otterbrass is in the userlist and if it needs to be removed.
      * @return that contains the list of users from the entities.
      */
-    static CreateUsersFromModel(entities: Entity[] | undefined, removeOtterBrass: boolean): (User | null)[] | null {
+    static CreateUsersFromModel(entities: Entity[] | undefined, removeOtterBrass: boolean): User[] | null {
         if (!entities) {
             return null;
         }
 
-        const users = entities.map((item) => {
+        const users = entities.filter((item) => {
+            // filter mentions
             if (Constants.MENTION === item.type) {
+                return item;
+            }}).map(item=>{
+
                 const user = new User();
                 const mention = item as Mention;
                 user.id = mention.mentioned.id;
                 user.name = mention.mentioned.name;
-                if (Utilities.filterOtterBrassUser(user)) {
-                    return user;
+                return user;
+            }).filter(item=>{
+                if(item && Utilities.filterOtterBrassUser(item)){
+                    return item;
                 }
             }
 
-            return null;
-        });
+            )
 
         return users;
     }

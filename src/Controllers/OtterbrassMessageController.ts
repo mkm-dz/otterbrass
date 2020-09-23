@@ -149,7 +149,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         const userSelf =
             Utilities.GetUserFromRegex(oofSelfPattern, activity.text, activity.from.name, activity.from.id);
 
-        if (null != userSelf) {
+        if (null !== userSelf) {
             const tempList: User[] = [];
             tempList.push(userSelf);
             if (!users) {
@@ -350,7 +350,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         let userNames = '';
         let count = 1;
-        if (null != results && results.length > 0) {
+        if (null !== results && results.length > 0) {
             for (const user of results) {
                 userNames += `${count}.-${user.name}<br />`;
                 count++;
@@ -415,7 +415,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
      * @param activity The activity associated with the request.
      */
     public async removeUserWithName(activity: Activity) {
-        if (null == activity) {
+        if (null === activity) {
             return;
         }
 
@@ -486,7 +486,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         const users = await reviewDao.nextUsers(channel, 3);
         let userNames = '';
         let count = 1;
-        if (null != users && users.length > 0) {
+        if (null !== users && users.length > 0) {
             for (const user of users) {
                 userNames += `${count}.-${user.name}<br />`;
                 count++;

@@ -136,11 +136,12 @@ export class ReviewDao {
                 pool.close();
                 sql.close();
             }
-            return results;
         } catch (error) {
             // #2: handle error gracefully.
             throw error;
         }
+
+        return results;
     }
 
     /**

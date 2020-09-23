@@ -56,10 +56,10 @@ export class CommonMessagesController {
         const addSelfPattern = '(.*)(\\[)(add)(\\])(.*)(\\[)(self)(\\])(.*)';
         const userSelf = Utilities.GetUserFromRegex(addSelfPattern, activity.text, activity.from.name, activity.from.id);
 
-        if (null != userSelf) {
+        if (null !== userSelf) {
             const tempList = new Array<User>();
             tempList.push(userSelf);
-            if (null == users) {
+            if (null === users) {
                 users = new Array<User>();
             }
 
