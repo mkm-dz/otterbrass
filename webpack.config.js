@@ -51,7 +51,7 @@ if (process.argv[2] === "--dev-mode") {
     config.plugins = []
 } else {
     console.log("**** Production mode activated ****");
-    config.module.rules.push(
+    //config.module.rules.push(
     // #4: Enable ESLint
     // ESLint
     // {
