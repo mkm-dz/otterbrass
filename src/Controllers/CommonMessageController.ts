@@ -134,11 +134,11 @@ export class CommonMessagesController {
             await this.channelControllerInstance.createReplyWithMention(BotMessages.NEXT_IN_LINE.replace('{0}', user.name), activity, mention);
             return user;
         }
-        else {
+
             // For some reason the user was not found in the message, most likely something wrong on our side
             // or all the users are OOF.
             await this.channelControllerInstance.createReply(BotMessages.INCORRECT_USER_SPECIFIED, activity);
             return null;
-        }
+
     }
 }

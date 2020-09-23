@@ -55,19 +55,19 @@ export class Utilities {
             return null;
         }
 
-        const users = entities.filter((item) => {
+        const users = entities.filter(item => {
             // filter mentions
             if (Constants.MENTION === item.type) {
                 return item;
-            }}).map(item=>{
+            }}).map(item => {
 
                 const user = new User();
                 const mention = item as Mention;
                 user.id = mention.mentioned.id;
                 user.name = mention.mentioned.name;
                 return user;
-            }).filter(item=>{
-                if(item && Utilities.filterOtterBrassUser(item)){
+            }).filter(item => {
+                if (item && Utilities.filterOtterBrassUser(item)){
                     return item;
                 }
             }
@@ -121,10 +121,10 @@ export class Utilities {
             // TODO: verify this logic as it changed when migrated.
             return parseInt(match.groups[7], 10);
         }
-        else {
+
             // Default shirt size.
             return Constants.DEFAULT_RANDOMNESS_LEVEL;
-        }
+
 
         return null;
     }
@@ -142,9 +142,9 @@ export class Utilities {
             if (results?.groups && results.groups[groupId]) {
                 return results.groups[groupId];
             }
-            else {
+
                 return null;
-            }
+
         }
         catch (error) {
             // #2: Implement a good exception handling system.
@@ -168,10 +168,10 @@ export class Utilities {
             size = EnumShirtSize[current as keyof typeof EnumShirtSize];
             return size;
         }
-        else {
+
             // Default shirt size.
             return EnumShirtSize.S;
-        }
+
     }
 
     /**
@@ -192,9 +192,9 @@ export class Utilities {
         if (match) {
             return EnumOofStatus.Active;
         }
-        else {
+
             return EnumOofStatus.None;
-        }
+
     }
 
     /**
@@ -215,9 +215,9 @@ export class Utilities {
         if (match) {
             return EnumRandomOperations.Remove;
         }
-        else {
+
             return EnumRandomOperations.None;
-        }
+
     }
 
         /**
@@ -240,9 +240,8 @@ export class Utilities {
             {
                 return EnumRandomOperations.GetChannelRandomness;
             }
-            else
-            {
+
                 return EnumRandomOperations.None;
-            }
+
         }
 }

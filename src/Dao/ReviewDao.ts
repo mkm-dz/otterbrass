@@ -122,7 +122,7 @@ export class ReviewDao {
         try {
             // #3: when I wrote this .NET Core 1.1 did not support datatables so it was the easiest to do this way.
             // foreach(User user in users) this can be changed when this is transformed into a REST API call
-            for(const user of users) {
+            for (const user of users) {
                 const pool = await sql.connect(Constants.SERVER_CONFIG);
                 const data = await pool.request()
                     .input('channelId', sql.NVarChar, '19:feca88094f7e44cdbdd0e98de4a7bd51@thread.skype')
@@ -184,13 +184,13 @@ export class ReviewDao {
                 .execute('usp_GetChannelRandomness');
 
             for (const item of data.recordset) {
-                if(-1 === channelRandomness)
+                if (-1 === channelRandomness)
                 {
                     channelRandomness = item.RandomLevel;
                 }
-                else if(channelRandomness !== item.RandomLevel)
+                else if (channelRandomness !== item.RandomLevel)
                 {
-                    throw new Error("Channel randomness does not match all the values");
+                    throw new Error('Channel randomness does not match all the values');
                 }
             }
 

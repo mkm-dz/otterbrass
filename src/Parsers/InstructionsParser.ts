@@ -73,9 +73,9 @@ export class InstructionsParser {
             if (match) {
                 return EnumInstructions.ChannelRandomness;
             }
-            else {
+
                 return EnumInstructions.None;
-            }
+
         }
         catch (error) {
             // #2: handle this exception properly

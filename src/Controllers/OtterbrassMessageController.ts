@@ -64,12 +64,12 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return null;
         }
 
-        let usersAdded: string = '';
-        let usersMissing: string = '';
+        let usersAdded = '';
+        let usersMissing = '';
 
         // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        if(activity.channelData && activity.channelData.teamsChannelId) {
+        if (activity.channelData && activity.channelData.teamsChannelId) {
             channel.id = activity.channelData.teamsChannelId
         } else {
             await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
@@ -419,7 +419,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        const removePatternWithUser = `(.*)(\\[)(remove)(\\])(.*)(\\[)(.*)(\\])(.*)`;
+        const removePatternWithUser = '(.*)(\\[)(remove)(\\])(.*)(\\[)(.*)(\\])(.*)';
         let name = Utilities.getGroupFromRegex(removePatternWithUser, activity.text, 7);
         if (name) {
             return;
@@ -533,7 +533,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         sentByUser.userChannel = channel;
 
         // We need to decide whether we will include a random user, to do this we use a simple rule:
-        // We use a number between 0 and 100 (inclusive) and if that number is less than the 
+        // We use a number between 0 and 100 (inclusive) and if that number is less than the
         // randomness level for the channel, we continue, otherwise we return and finish this call.
         const reviewDao = new ReviewDao();
         channel = await reviewDao.getChannelRandomness(channel)
@@ -556,8 +556,8 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
             // We also need to take out any excluded users
             if (excludedUsers) {
-                filteredList = filteredList.filter(user=>{
-                    for(const excludedUser of excludedUsers){
+                filteredList = filteredList.filter(user => {
+                    for (const excludedUser of excludedUsers){
                         if (user.id !== excludedUser.id && user.name !== excludedUser.name) {
                             return user;
                         }
@@ -616,9 +616,9 @@ export class OtterBrassMessageController implements MessageControllerInterface {
                     if (n1 && n1.rank && n2 && n2.rank) {
                         // We want the list ordered from first to bottom.
                         return n2.rank - n1.rank
-                    } else {
-                        return -1
                     }
+                        return -1
+
                 });
 
                 for (const user of users) {

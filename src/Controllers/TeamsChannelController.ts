@@ -9,7 +9,7 @@ export class TeamsChannelController implements ChannelControllersInterface
     private context: TurnContext;
 
     private static readonly myLazyController = (context: TurnContext) => {
-        if(!TeamsChannelController._myLazyController) {
+        if (!TeamsChannelController._myLazyController) {
             TeamsChannelController._myLazyController = new TeamsChannelController(context);
         }
 
@@ -20,7 +20,7 @@ export class TeamsChannelController implements ChannelControllersInterface
     /**
      * Initializes a new instance of the <see cref="TeamsChannelController"/> class.
      */
-    private constructor (context: TurnContext)
+    private constructor(context: TurnContext)
     {
         this.context = context
     }

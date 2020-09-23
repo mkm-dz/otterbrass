@@ -16,7 +16,7 @@ export class UserDao {
      */
     public async addUser(user: User) {
         try {
-            if(!user.userChannel || !user.userChannel.id) {
+            if (!user.userChannel || !user.userChannel.id) {
                 // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
@@ -39,7 +39,7 @@ export class UserDao {
 
     public async removeUser(user: User) {
         try {
-            if(!user.userChannel || !user.userChannel.id) {
+            if (!user.userChannel || !user.userChannel.id) {
                 // #2: Log exception gracefully.
                 throw new Error('Could not remove user because a channel was not provided.')
             }
@@ -141,7 +141,7 @@ export class UserDao {
      */
     public async addRandom(user: User) {
         try {
-            if(!user.userChannel || !user.userChannel.id) {
+            if (!user.userChannel || !user.userChannel.id) {
                 // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
@@ -165,7 +165,7 @@ export class UserDao {
      */
     public async removeRandom(user: User) {
         try {
-            if(!user.userChannel || !user.userChannel.id) {
+            if (!user.userChannel || !user.userChannel.id) {
                 // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
