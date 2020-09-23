@@ -4,12 +4,12 @@
     "description": "RoundRobin",
     "author": "Vidal Ortega",
     "license": "MIT",
-    "main": "./lib/index.js",
+    "main": "./dist/index.js",
     "scripts": {
         "build": "webpack --dev-mode",
         "lint": "tslint -c tslint.json 'src/**/*.ts'",
         "postinstall": "npm run build && node ./deploymentScripts/webConfigPrep.js",
-        "start": "npm run build && node ./dist/index_bundle.js",
+        "start": "npm run build && node ./dist/index.js",
         "test": "echo \"Error: no test specified\" && exit 1",
         "watch": "nodemon --watch ./src -e ts --exec \"npm run start\""
     },

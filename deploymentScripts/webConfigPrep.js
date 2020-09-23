@@ -12,8 +12,8 @@ const WEB_CONFIG_FILE = './web.config';
 
 if (fs.existsSync(path.resolve(WEB_CONFIG_FILE))) {
     replace({
-        regex: "url=\"index_bundle.js\"",
-        replacement: "url=\"dist/index_bundle.js\"",
+        regex: "url=\"index.js\"",
+        replacement: "url=\"dist/index.js\"",
         paths: ['./web.config'],
         recursive: false,
         silent: true,
