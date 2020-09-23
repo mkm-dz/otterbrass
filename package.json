@@ -25,8 +25,8 @@
         "restify": "8.5.1"
     },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^3.5.0",
-        "@typescript-eslint/parser": "^3.5.0",
+        "@typescript-eslint/eslint-plugin": "3.5.0",
+        "@typescript-eslint/parser": "3.5.0",
         "@types/restify": "8.4.2",
         "eslint": "7.4.0",
         "eslint-loader": "4.0.2",
