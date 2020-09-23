@@ -19,6 +19,7 @@ export class MessageController {
         {
             return;
         }
+
         const activity = context.activity;
         const _messageController: MessageControllerInterface = OtterBrassMessageController.instance(context);
         const _channelController: ChannelControllersInterface = TeamsChannelController.instance(context);

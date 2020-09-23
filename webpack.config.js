@@ -8,7 +8,7 @@ const config = {
         "index": "./src/index.ts",
     },
     output: {
-        filename: "[name]_bundle.js",
+        filename: "[name].js",
         path: __dirname + "/dist"
     },
     resolve: {
