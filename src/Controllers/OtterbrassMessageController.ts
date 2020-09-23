@@ -2,7 +2,7 @@ import { MessageControllerInterface } from '../Interfaces/MessageControllerInter
 import { ChannelControllersInterface } from '../Interfaces/ChannelControllersInterface';
 import { TeamsChannelController } from './TeamsChannelController';
 import { CommonMessagesController } from './CommonMessageController';
-import { Activity, TurnContext } from 'botbuilder';
+import { Activity, TurnContext, Mention} from 'botbuilder';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { User } from '../Models/User';
 import { Channel } from '../Models/Channel';
@@ -545,46 +545,50 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        const users = this.getRandomUsers(activity);
+        const users = await this.getRandomUsers(activity);
+        if (users) {
+            // We need to take out ourselves from the randomList
+            let filteredList = users.filter(user => {
+                if (user.id !== sentByUser.id && user.name !== sentByUser.name) {
+                    return user
+                }
+            });
 
-        // TODO: verify this logic as it changed when migrated.
-        // We need to take out ourselves from the randomList
-        // IEnumerable<User> filteredList = users.Where(user => !user.Id.Equals(sentByUser.Id, StringComparison.InvariantCultureIgnoreCase) &&
-        //                                         !user.Name.Equals(sentByUser.Name, StringComparison.InvariantCultureIgnoreCase)).ToList<User>();
+            // We also need to take out any excluded users
+            if (excludedUsers) {
+                filteredList = filteredList.filter(user=>{
+                    for(const excludedUser of excludedUsers){
+                        if (user.id !== excludedUser.id && user.name !== excludedUser.name) {
+                            return user;
+                        }
+                    }
+                });
+            }
 
-        // We also need to take out any excluded users
-        if (excludedUsers) {
-            // TODO: verify this logic as it changed when migrated.
-            // filteredList = filteredList.Except(excludedUsers, new UserComparer());
+            // We need to choose the user.
+            // Get a random number between 0 and the max length of the array.
+            let resultUser = null;
+            const index = Math.random() * filteredList.length;
+            if (filteredList.length > 0) {
+                resultUser = filteredList[index];
+            }
+
+            if (resultUser) {
+                const mentioned = {
+                    id: resultUser.id,
+                    name: resultUser.name
+                };
+
+                const mention = {
+                    text: `<at> ${resultUser.name} </at>`,
+                    mentioned,
+                    type: Constants.MENTION
+                }
+
+                await reviewDao.assign(channel, shirtSize, [resultUser]);
+                await this.channelControllerInstance.createReplyWithMention(BotMessages.GET_NEXT_RANDOM.replace('{0}', (resultUser.name || 'ERROR GETTING NAME OF RANDOM USER')), activity, mention as Mention);
+            }
         }
-
-        // We need to choose the user.
-        // Get a random number between 0 and the max length of the array.
-        // let resultUser = null;
-        // const index = Math.random() * filteredList.Count();
-
-        // if (filteredList.Count() > 0) {
-        //     resultUser = filteredList.ElementAt(index);
-        // }
-
-        // if (resultUser) {
-        //     const mentioned = {
-        //         id: resultUser.id,
-        //         name: resultUser.name
-        //     };
-
-        //     const mention = {
-        //         text: `<at> ${resultUser.name} </at>`;
-        //         mentioned,
-        //         type: Constants.MENTION
-        //     }
-
-        //     // TODO: verify this logic as it changed when migrated.
-        //     const results = reviewDao.assign(channel, shirtSize, [resultUser]);
-        //     const test = await this.channelControllerInstance.createReplyWithMention(BotMessages.GET_NEXT_RANDOM.replace('{0}', resultUser.name), activity, mention);
-        // }
-
-        return;
     }
 
     /**
