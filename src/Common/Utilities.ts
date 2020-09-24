@@ -36,12 +36,24 @@ export class Utilities {
      * @param return The activity that can be used in a reply.
      */
     static getTemplateActivity(receivedActivity: Activity, replyText: string): Activity {
-        // TODO: verify this logic as it changed when migrated.
-
         // {0} serviceUrl, {1} conversationId, {2} activityIds
-        const activity: Activity = receivedActivity;
-        activity.type = 'message';
-        activity.text = replyText;
+        const activity: Activity = {
+            conversation: receivedActivity.conversation,
+            from: receivedActivity.recipient,
+            locale: receivedActivity.locale,
+            recipient: receivedActivity.from,
+            replyToId: receivedActivity.id,
+            type: 'message',
+            text: replyText,
+            localTimezone: receivedActivity.localTimezone,
+            callerId: receivedActivity.callerId,
+            serviceUrl: receivedActivity.serviceUrl,
+            channelId: receivedActivity.channelId,
+            label: receivedActivity.label,
+            valueType: receivedActivity.valueType,
+            listenFor: receivedActivity.listenFor
+        };
+
         return activity;
     }
 
@@ -68,7 +80,7 @@ export class Utilities {
                 user.name = mention.mentioned.name;
                 return user;
             }).filter(item => {
-                if (item && Utilities.filterOtterBrassUser(item)){
+                if (item && removeOtterBrass && !Utilities.filterOtterBrassUser(item)){
                     return item;
                 }
             }
@@ -106,7 +118,9 @@ export class Utilities {
      * @returns true if the user is otterbrass, false otherwise
      */
     static filterOtterBrassUser(user: User): boolean {
-        return 'otterbrass' === user.name?.toLowerCase() || 'otterbrassbeta' === user.name?.toLowerCase();
+        return 'otterbrass' === user.name?.toLowerCase()
+        || 'otterbrassv2' === user.name?.toLowerCase()
+         || 'otterbrassbeta' === user.name?.toLowerCase();
     }
 
     /**

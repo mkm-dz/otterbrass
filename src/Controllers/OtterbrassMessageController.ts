@@ -67,7 +67,6 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         let usersAdded = '';
         let usersMissing = '';
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
         if (activity.channelData && activity.channelData.teamsChannelId) {
             channel.id = activity.channelData.teamsChannelId
@@ -78,13 +77,11 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         // Getting the mentions
         const entities = activity.entities;
-
         channel.name = activity.channelId;
         const users = Utilities.CreateUsersFromModel(entities, true);
-
-        if (!users) {
+        if (!users || users.length === 0) {
             await this.channelControllerInstance.createReply(BotMessages.MENTION_NOT_FOUND, activity);
-            return Promise.resolve(null);
+            return null;
         }
 
         const reviewDao = new ReviewDao();
@@ -113,7 +110,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         if (usersMissing) {
-            replyMsg += BotMessages.ASSIGN_INCORRECT.replace('{0}', usersAdded);
+            replyMsg += BotMessages.ASSIGN_INCORRECT.replace('{0}', usersMissing);
         }
 
         await this.channelControllerInstance.createReply(replyMsg, activity);
