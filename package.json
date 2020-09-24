@@ -7,6 +7,7 @@
     "main": "./dist/index.js",
     "scripts": {
         "build": "webpack --dev-mode",
+        "release": "webpack --production-mode",
         "lint": "tslint -c tslint.json 'src/**/*.ts'",
         "postinstall": "npm run build && node ./deploymentScripts/webConfigPrep.js",
         "start": "npm run build && node ./dist/index.js",
