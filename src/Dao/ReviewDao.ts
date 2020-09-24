@@ -78,7 +78,8 @@ export class ReviewDao {
             return result;
         } catch (error) {
             // #2: handle error gracefully.
-            console.error(error);throw error;
+            console.error(error);
+            throw error;
         }
     }
 

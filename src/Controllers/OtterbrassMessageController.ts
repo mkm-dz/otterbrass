@@ -17,18 +17,28 @@ import { Constants } from '../Common/Constants';
 
 export class OtterBrassMessageController implements MessageControllerInterface {
 
-    private static readonly myLazyController = (context: TurnContext) => {
-        return new OtterBrassMessageController(context);
-    }
+    private static _myLazyController: OtterBrassMessageController;
+    private context: TurnContext;
+    private channelControllerInstance: ChannelControllersInterface;
+    private _commonMessageController: CommonMessagesController;
 
-    private channelControllerInstance: ChannelControllersInterface = TeamsChannelController.instance(this.context);
-    private _commonMessageController: CommonMessagesController = CommonMessagesController.instance(this.context);
+    private static readonly myLazyController = (context: TurnContext) => {
+        if (!OtterBrassMessageController._myLazyController) {
+            OtterBrassMessageController._myLazyController = new OtterBrassMessageController(context);
+        }
+
+        OtterBrassMessageController._myLazyController.context = context;
+        return OtterBrassMessageController._myLazyController;
+    }
 
     /**
      * Initializes a new instance of the <see cref="OtterBrassMessageController"/> class.
      */
-    // tslint:disable-next-line: no-empty
-    private constructor(private context: TurnContext) {}
+    private constructor(context: TurnContext) {
+        this.context = context;
+        this.channelControllerInstance = TeamsChannelController.instance(this.context);
+        this._commonMessageController = CommonMessagesController.instance(this.context);
+    }
 
     /**
      * Gets a singleton instance of the HttpController class.
@@ -598,10 +608,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         try {
-             // TODO: verify this logic as it changed when migrated.
-            const channel: Channel | null = new Channel();
-            const channelData = JSON.parse(activity.channelData)
-            channel.id = channelData.TeamsChannelId;
+            const channel = new Channel();
+            if (activity.channelData && activity.channelData.teamsChannelId) {
+                channel.id = activity.channelData.teamsChannelId
+            } else {
+                await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+                return null;
+            }
 
             const reviewDao = new ReviewDao();
             let users = await reviewDao.nextUsers(channel, Constants.MAX_USERS_TO_LIST);
@@ -633,7 +646,9 @@ export class OtterBrassMessageController implements MessageControllerInterface {
                 return;
             }
         }
-        catch (Exception) {
+        catch (error) {
+            // #2 handle error gracefully
+            console.error(error);
             await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
         }
     }
