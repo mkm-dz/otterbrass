@@ -48,28 +48,38 @@ export class MessageController {
                 }
             case EnumInstructions.Help:
                 {
+                    // Need to await (even there is no result) to keep the activity context. Otherwise there is a race
+                    // condition vs next() [on the caller method]
                     await _channelController.createReply(BotMessages.HELP, activity);
                     break;
                 }
             case EnumInstructions.Changelog:
                 {
+                    // Need to await (even there is no result) to keep the activity context. Otherwise there is a race
+                    // condition vs next() [on the caller method]
                     await _channelController.createReply(BotMessages.CHANGELOG, activity);
                     break;
                 }
             case EnumInstructions.RemoveWithUser:
                 {
-                    _messageController.removeUserWithName(activity);
+                    // Need to await (even there is no result) to keep the activity context. Otherwise there is a race
+                    // condition vs next() [on the caller method]
+                    await _messageController.removeUserWithName(activity);
                     break;
                 }
 
             case EnumInstructions.Remove:
                 {
-                    _messageController.removeUser(activity);
+                    // Need to await (even there is no result) to keep the activity context. Otherwise there is a race
+                    // condition vs next() [on the caller method]
+                    await _messageController.removeUser(activity);
                     break;
                 }
             case EnumInstructions.Scoreboard:
                 {
-                    _messageController.scoreBoard(activity);
+                    // Need to await (even there is no result) to keep the activity context. Otherwise there is a race
+                    // condition vs next() [on the caller method]
+                    await _messageController.scoreBoard(activity);
                     break;
                 }
             case EnumInstructions.OofStatus:
