@@ -34,11 +34,11 @@ export class ReviewDao {
                 .output('ranking', sql.NVarChar)
                 .execute('usp_GetNext');
 
-            if (data.parameters.userId) {
+            if (data.output.userId) {
                 user = new User();
-                user.id = data.parameters.userId;
-                user.name = data.parameters.userName;
-                user.rank = data.parameters.ranking;
+                user.id = data.output.userId;
+                user.name = data.output.userName;
+                user.rank = data.output.ranking;
             }
 
             pool.close();
@@ -128,12 +128,10 @@ export class ReviewDao {
                 const data = await pool.request()
                     .input('channelId', sql.NVarChar, channel.id)
                     .input('rankIncrement', sql.Float, 3)
-                    .input('userId', sql.NVarChar, '29:1G1P0LhPNI4AOEPfqqdMfQD9mbAuDAa2Ded04zvtg8jDWwrjYogGEqTSliDGsU_Oswi2Wpj_TT-jl_aEuSKTkrQ')
+                    .input('userId', sql.NVarChar, user.id)
                     .output('result', sql.Int)
                     .execute('usp_Assign');
-
-                results.set(user, data.parameters.result);
-
+                results.set(user, data.output.result);
                 pool.close();
                 sql.close();
             }

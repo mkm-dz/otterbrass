@@ -94,7 +94,7 @@ export class UserDao {
                     pool.close();
                     sql.close();
 
-                    result.set(user, data.parameters.result);
+                    result.set(user, data.output.result);
                 }
             }
         } catch (error) {

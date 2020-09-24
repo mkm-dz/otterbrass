@@ -9,7 +9,9 @@ export class Constants {
         password: process.env.SqlServerPassword,
         database: process.env.SqlServerDatabase,
         port: parseInt((process.env.SqlServerPort || '1433'), 10),
-        enableArithAbort: false
+        options: {
+            enableArithAbort: false
+        }
     };
     public static MENTION = 'mention';
     public static MAX_USERS_TO_LIST = 500;
