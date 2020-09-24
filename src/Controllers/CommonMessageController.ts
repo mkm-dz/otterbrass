@@ -42,13 +42,16 @@ export class CommonMessagesController {
             return;
         }
 
-        // TODO: verify this logic as it changed when migrated.
-        const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
         const entities = activity.entities;
 
-        channel.name = activity.channelId;
-        channel.id = channelData.teamsChannelId;
+        const channel = new Channel();
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         let users = Utilities.CreateUsersFromModel(entities, true);
 
@@ -107,10 +110,15 @@ export class CommonMessagesController {
             Promise.resolve(null);
         }
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.TeamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return null;
+        }
+
         const sentByUser = new User();
         sentByUser.id = activity.from.id;
         sentByUser.name = activity.from.name;

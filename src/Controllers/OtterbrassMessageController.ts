@@ -140,10 +140,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         let usersOof = '';
         let usersMissing = '';
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         // Getting the mentions
         const entities = activity.entities;
@@ -237,11 +240,14 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         currentUser.name = activity.from.name;
         currentUser.id = activity.from.id;
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
-        channel.name = activity.channelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         currentUser.userChannel = channel;
 
@@ -283,11 +289,14 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
-        channel.name = activity.channelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         const reviewDao = new ReviewDao();
 
@@ -345,12 +354,14 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
-
-        channel.name = activity.channelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         const userDao = new UserDao();
         const results = await userDao.getOofUsers(channel);
@@ -383,12 +394,14 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-
-        channel.name = activity.channelId;
-        channel.id = channelData.TeamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         let replyMsg = '';
         const reviewDao = new ReviewDao();
@@ -437,12 +450,14 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             name = activity.from.name;
         }
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-
-        channel.name = activity.channelId;
-        channel.id = channelData.teamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+            channel.name = activity.channelId;
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         let replyMsg = '';
         const reviewDao = new ReviewDao();
@@ -484,10 +499,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             return;
         }
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.teamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         const reviewDao = new ReviewDao();
         const users = await reviewDao.nextUsers(channel, 3);
@@ -512,11 +530,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         const reviewDao = new ReviewDao();
 
-        // TODO: verify this logic as it changed when migrated.
         const channel = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-
-        channel.id = channelData.teamsChannelId;
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         const users = await reviewDao.getNextRandomUsers(channel);
         return users;
@@ -529,10 +549,13 @@ export class OtterBrassMessageController implements MessageControllerInterface {
      * @param excludedUsers A list of users that should be excluded
      */
     public async getNextRandomUser(activity: Activity, shirtSize: EnumShirtSize, excludedUsers: User[] = []) {
-        // TODO: verify this logic as it changed when migrated.
-        let channel: Channel | null = new Channel();
-        const channelData = JSON.parse(activity.channelData)
-        channel.id = channelData.TeamsChannelId;
+        let channel = new Channel();
+        if (activity.channelData && activity.channelData.teamsChannelId) {
+            channel.id = activity.channelData.teamsChannelId
+        } else {
+            await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
+            return;
+        }
 
         const sentByUser = new User();
         sentByUser.id = activity.from.id;

@@ -170,10 +170,11 @@ export class ReviewDao {
      * @param channel A channel from which we want to retrieve the randomness level.</param>
      * <returns>A channel that contains the randomness level
      */
-    public async getChannelRandomness(channel: Channel): Promise<Channel | null> {
+    public async getChannelRandomness(channel: Channel): Promise<Channel> {
         if (!channel)
         {
-            return null;
+            // TODO: Fix this really bad way of bypassing the compiler.
+            return channel;
         }
 
         try {
@@ -201,7 +202,8 @@ export class ReviewDao {
             return channel;
         } catch (error) {
             // #2: handle error gracefully.
-            console.error(error);throw error;
+            console.error(error);
+            throw error;
         }
     }
 }
