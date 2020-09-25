@@ -15,16 +15,7 @@ Otterbrass is a MS Teams bot that distribute workitems load among suscribed memb
 - Once all the scripts are executed your database should be all set.
 
 # How to run it (locally)
-- Clone this repository
-- `npm install`
-- `npm run release`
-- `npm run start`
-- Fill `dotenv-sample` file with your DB configuration and App Id.
-- Rename `dotenv-sample` to `.env`
-- If everything is working as expected you should get a message with a port number.
-- Download [Bot Framework Emulator](https://github.com/microsoft/botframework-emulator)
-- In the `Bot Framework Emulator` connect to `http://localhost:[port]/api/messages
-- You should get a welcome message from Otterbrass!
+- Check CONTRIBUTING.md
 
 # How to deploy it.
 - Follow the steps to create a bot service from: [Deploy your bot to Azure](https://docs.microsoft.com/en-us/azure/bot-service/bot-service-quickstart-registration?view=azure-bot-service-4.0#create-a-registration-application)
