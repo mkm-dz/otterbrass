@@ -29,7 +29,7 @@ Contributions are always welcome! We only ask that you open an issue first so we
 - You should get a welcome message from Otterbrass!
 
 ## Testing
-This in an open are open to contribution.
+This in an area open to contribution.
 
 ## Issue tags
 * "Bug": Something that should work is broken
