@@ -1,67 +1,46 @@
 # Otterbrass
+Otterbrass is a MS Teams bot that distribute workitems load among suscribed members over a channel.
 
-RoundRobin
+# Prerequisites
+- A SQL Server and a blank database configured.
+- Node 10.X  or higher
 
-This bot has been created using [Bot Framework](https://dev.botframework.com), it shows how to create a simple bot that accepts input from the user and echoes it back.
+# Set up database
+- Go to `dbScripts` folder 
+- Execute (you can copy and paste) each one of the scripts in the version folders, you need to execute them in the right version order:
+  - V1.0 first
+  - V1.1 second
+  - V1.2 ...
+  - Once inside the version folder(e.g V1.0) you can execute the scripts in any order.
+- Once all the scripts are executed your database should be all set.
 
-## Prerequisites
+# How to run it (locally)
+- Clone this repository
+- `npm install`
+- `npm run release`
+- `npm run start`
+- Fill `dotenv-sample` file with your DB configuration and App Id.
+- Rename `dotenv-sample` to `.env`
+- If everything is working as expected you should get a message with a port number.
+- Download [Bot Framework Emulator](https://github.com/microsoft/botframework-emulator)
+- In the `Bot Framework Emulator` connect to `http://localhost:[port]/api/messages
+- You should get a welcome message from Otterbrass!
 
-- [Node.js](https://nodejs.org) version 10.14.1 or higher
+# How to deploy it.
+- Follow the steps to create a bot service from: [Deploy your bot to Azure](https://docs.microsoft.com/en-us/azure/bot-service/bot-service-quickstart-registration?view=azure-bot-service-4.0#create-a-registration-application)
+- Set the properties from the dotenv-sample file into host environment properties. e.g in Azure you can do this on the `WebApp Service Blade -> Configuration`
+- Personalize the `web.config` file to your server needs, a minimum requirements example is provided in this repository.
+- Run `npm run release`
+- Deploy the following files to your service `wwwroot` folder:
+  - web.config
+  - dist\index.js
+  - package.json
+  - package-lock.json
+- Copy the `node_modules` folder to your wwwroot folder, or run `npm install` into your server console (in the wwwroot) folder.
+- Restart your server.
+- Deploy your bot to teams channel using the following instructions:
+  - [Create an app package for your Microsoft Teams app](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/apps-package#creating-a-manifest)
+  - [Run and debug your Microsoft Teams app](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/debug)
 
-    ```bash
-    # determine node version
-    node --version
-    ```
-
-## To run the bot
-
-- Install modules
-
-    ```bash
-    npm install
-    ```
-- Start the bot
-
-    ```bash
-    npm start
-    ```
-
-## Testing the bot using Bot Framework Emulator
-
-[Bot Framework Emulator](https://github.com/microsoft/botframework-emulator) is a desktop application that allows bot developers to test and debug their bots on localhost or running remotely through a tunnel.
-
-- Install the Bot Framework Emulator version 4.9.0 or greater from [here](https://github.com/Microsoft/BotFramework-Emulator/releases)
-
-### Connect to the bot using Bot Framework Emulator
-
-- Launch Bot Framework Emulator
-- File -> Open Bot
-- Enter a Bot URL of `http://localhost:3978/api/messages`
-
-## Deploy the bot to Azure
-
-### Publishing Changes to Azure Bot Service
-
-    ```bash
-    # build the TypeScript bot before you publish
-    npm run build
-    ```
-
-To learn more about deploying a bot to Azure, see [Deploy your bot to Azure](https://aka.ms/azuredeployment) for a complete list of deployment instructions.
-
-## Further reading
-
-- [Bot Framework Documentation](https://docs.botframework.com)
-- [Bot Basics](https://docs.microsoft.com/azure/bot-service/bot-builder-basics?view=azure-bot-service-4.0)
-- [Dialogs](https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-concept-dialog?view=azure-bot-service-4.0)
-- [Gathering Input Using Prompts](https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-prompts?view=azure-bot-service-4.0)
-- [Activity processing](https://docs.microsoft.com/en-us/azure/bot-service/bot-builder-concept-activity-processing?view=azure-bot-service-4.0)
-- [Azure Bot Service Introduction](https://docs.microsoft.com/azure/bot-service/bot-service-overview-introduction?view=azure-bot-service-4.0)
-- [Azure Bot Service Documentation](https://docs.microsoft.com/azure/bot-service/?view=azure-bot-service-4.0)
-- [Azure CLI](https://docs.microsoft.com/cli/azure/?view=azure-cli-latest)
-- [Azure Portal](https://portal.azure.com)
-- [Language Understanding using LUIS](https://docs.microsoft.com/en-us/azure/cognitive-services/luis/)
-- [Channels and Bot Connector Service](https://docs.microsoft.com/en-us/azure/bot-service/bot-concepts?view=azure-bot-service-4.0)
-- [TypeScript](https://www.typescriptlang.org)
-- [Restify](https://www.npmjs.com/package/restify)
-- [dotenv](https://www.npmjs.com/package/dotenv)
+# Contributing
+Please refer to CONTRIBUTING.md for instructions on how to build and debug.
