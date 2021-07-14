@@ -4,12 +4,10 @@
     "importHelpers": true,
     "removeComments": true,
     "strict": true,
-    "declaration": true,
     "target": "ES2018",
     "outDir": "./dist",
     "module": "commonjs",
     "rootDir": "./src",
-    "sourceMap": true,
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   }
