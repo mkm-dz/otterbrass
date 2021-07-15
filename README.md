@@ -27,7 +27,8 @@ Otterbrass is a MS Teams bot that distribute workitems load among suscribed memb
   - dist\index.js
   - package.json
   - package-lock.json
-- Copy the `node_modules` folder to your wwwroot folder, or run `npm install` into your server console (in the wwwroot) folder.
+- Copy the `node_modules` folder to your wwwroot folder, or run `npm install` into your server console (in the wwwroot) folder. More on why in [here](https://github.com/liady/webpack-node-externals)
+
 - Restart your server.
 - Deploy your bot to teams channel using the following instructions:
   - [Create an app package for your Microsoft Teams app](https://docs.microsoft.com/en-us/microsoftteams/platform/concepts/build-and-test/apps-package#creating-a-manifest)
