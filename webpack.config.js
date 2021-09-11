@@ -16,6 +16,7 @@ const config = (env, argv) => {
             // Add '.ts' and '.tsx' as resolvable extensions.
             extensions: [".ts", ".tsx", ".js", ".json"]
         },
+        externalsPresets: { node: true }, // in order to ignore built-in modules like path, fs, etc. (https://github.com/liady/webpack-node-externals)
         externals: [nodeExternals()], // in order to ignore all modules in node_modules folder
 
         module: {
