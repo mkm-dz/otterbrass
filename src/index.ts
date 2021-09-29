@@ -84,7 +84,10 @@ server.on('upgrade', (req, socket, head) => {
     // Set onTurnError for the BotFrameworkAdapter created for each connection.
     streamingAdapter.onTurnError = onTurnErrorHandler;
 
-    streamingAdapter.useWebSocket(req, socket, head, async context => {
+    // https://github.com/microsoft/BotBuilder-Samples/pull/3407 recommends sticking with
+    // "@types/node": "^10.17.27" but I require a new version for appInsights so 
+    // adding this 'unsafe cast' (TODO: update this with latest recommendations.)
+    streamingAdapter.useWebSocket(req, socket as any, head, async context => {
         // After connecting via WebSocket, run this logic for every request sent over
         // the WebSocket connection.
         await myBot.run(context);
