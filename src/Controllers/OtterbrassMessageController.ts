@@ -441,7 +441,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
 
         const removePatternWithUser = '(.*)(\\[)(remove)(\\])(.*)(\\[)(.*)(\\])(.*)';
         let name = Utilities.getGroupFromRegex(removePatternWithUser, activity.text, 7);
-        if (name) {
+        if (!name) {
             return;
         }
 

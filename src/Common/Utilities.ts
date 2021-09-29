@@ -153,12 +153,11 @@ export class Utilities {
     static getGroupFromRegex(pattern: string, stringToBeVerified: string, groupId: number) {
         const results = Utilities.verifyRegex(pattern, stringToBeVerified);
         try {
-            // TODO: verify this logic as it changed when migrated.
-            if (results?.groups && results.groups[groupId]) {
-                return results.groups[groupId];
+            if (results && results.length >= groupId && results[groupId]) {
+                return results[groupId];
             }
 
-                return null;
+            return null;
 
         }
         catch (error) {
