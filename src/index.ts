@@ -15,6 +15,7 @@ import { BotFrameworkAdapter } from 'botbuilder';
 
 // This bot's main dialog.
 import { EchoBot } from './bot';
+import { AppInsights } from './Common/AppInsights';
 
 
 // Create HTTP server.
@@ -34,10 +35,7 @@ const adapter = new BotFrameworkAdapter({
 
 // Catch-all for errors.
 const onTurnErrorHandler = async (context: any, error: any) => {
-    // This check writes out errors to console log .vs. app insights.
-    // NOTE: In production environment, you should consider logging this to Azure
-    //       application insights.
-    console.error(`\n [onTurnError] unhandled error: ${error}`);
+    AppInsights.instance.logException(`\n [onTurnError] unhandled error: ${JSON.stringify(error)}`);
 
     // Send a trace activity, which will be displayed in Bot Framework Emulator
     await context.sendTraceActivity(
@@ -84,7 +82,10 @@ server.on('upgrade', (req, socket, head) => {
     // Set onTurnError for the BotFrameworkAdapter created for each connection.
     streamingAdapter.onTurnError = onTurnErrorHandler;
 
-    streamingAdapter.useWebSocket(req, socket, head, async context => {
+    // https://github.com/microsoft/BotBuilder-Samples/pull/3407 recommends sticking with
+    // "@types/node": "^10.17.27" but I require a new version for appInsights so 
+    // adding this 'unsafe cast' (TODO: update this with latest recommendations.)
+    streamingAdapter.useWebSocket(req, socket as any, head, async context => {
         // After connecting via WebSocket, run this logic for every request sent over
         // the WebSocket connection.
         await myBot.run(context);

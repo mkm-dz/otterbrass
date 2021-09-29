@@ -4,6 +4,7 @@ import { Constants } from './Constants';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { EnumOofStatus } from '../Enums/EnumOofStatus';
 import { EnumRandomOperations } from '../Enums/EnumRandomOperations';
+import { AppInsights } from './AppInsights';
 
 /**
  * Contains a series of utility functions used across the code.
@@ -22,8 +23,7 @@ export class Utilities {
             return result;
         }
         catch (error) {
-            // #2: Implement a good exception handling system.
-            console.error(error);
+            AppInsights.instance.logException(`[verifyRegex] stackTrace: ${JSON.stringify(error)}`);
             throw error;
         }
     }
@@ -152,18 +152,12 @@ export class Utilities {
      */
     static getGroupFromRegex(pattern: string, stringToBeVerified: string, groupId: number) {
         const results = Utilities.verifyRegex(pattern, stringToBeVerified);
-        try {
             if (results && results.length >= groupId && results[groupId]) {
                 return results[groupId];
             }
 
+            AppInsights.instance.logTrace(`[getGroupFromRegex] possible issue, could not get user for: ${stringToBeVerified}`);
             return null;
-
-        }
-        catch (error) {
-            // #2: Implement a good exception handling system.
-            console.error(error);throw error;
-        }
     }
 
     /**

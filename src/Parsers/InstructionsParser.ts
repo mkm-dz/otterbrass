@@ -1,5 +1,6 @@
 import { EnumInstructions } from '../Enums/EnumInstructions'
 import { Utilities } from '../Common/Utilities'
+import { AppInsights } from '../Common/AppInsights';
 
 export class InstructionsParser {
 
@@ -78,8 +79,7 @@ export class InstructionsParser {
 
         }
         catch (error) {
-            // #2: handle this exception properly
-            console.error(error);
+            AppInsights.instance.logException(JSON.stringify(error));
             throw error;
         }
     }
