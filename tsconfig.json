@@ -9,6 +9,7 @@
     "module": "commonjs",
     "rootDir": "./src",
     "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "sourceMap": true
   }
 }
