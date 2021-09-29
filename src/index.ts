@@ -15,6 +15,7 @@ import { BotFrameworkAdapter } from 'botbuilder';
 
 // This bot's main dialog.
 import { EchoBot } from './bot';
+import { AppInsights } from './Common/AppInsights';
 
 
 // Create HTTP server.
@@ -34,10 +35,7 @@ const adapter = new BotFrameworkAdapter({
 
 // Catch-all for errors.
 const onTurnErrorHandler = async (context: any, error: any) => {
-    // This check writes out errors to console log .vs. app insights.
-    // NOTE: In production environment, you should consider logging this to Azure
-    //       application insights.
-    console.error(`\n [onTurnError] unhandled error: ${error}`);
+    AppInsights.instance.logException(`\n [onTurnError] unhandled error: ${JSON.stringify(error)}`);
 
     // Send a trace activity, which will be displayed in Bot Framework Emulator
     await context.sendTraceActivity(

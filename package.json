@@ -18,6 +18,7 @@
         "url": "https://github.com"
     },
     "dependencies": {
+        "applicationinsights": "2.1.8",
         "botbuilder": "4.14.1",
         "botframework-directlinejs": "0.15.0",
         "dotenv": "10.0.0",
@@ -25,8 +26,8 @@
         "restify": "8.6.0"
     },
     "devDependencies": {
-        "@types/restify": "8.5.2",
         "@types/node": "16.10.2",
+        "@types/restify": "8.5.2",
         "@typescript-eslint/eslint-plugin": "4.32.0",
         "@typescript-eslint/parser": "4.32.0",
         "eslint": "7.32.0",

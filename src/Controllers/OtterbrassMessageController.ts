@@ -2,7 +2,7 @@ import { MessageControllerInterface } from '../Interfaces/MessageControllerInter
 import { ChannelControllersInterface } from '../Interfaces/ChannelControllersInterface';
 import { TeamsChannelController } from './TeamsChannelController';
 import { CommonMessagesController } from './CommonMessageController';
-import { Activity, TurnContext, Mention} from 'botbuilder';
+import { Activity, TurnContext, Mention } from 'botbuilder';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { User } from '../Models/User';
 import { Channel } from '../Models/Channel';
@@ -14,6 +14,7 @@ import { EnumOofStatus } from '../Enums/EnumOofStatus';
 import { UserDao } from '../Dao/UserDao';
 import { EnumRandomOperations } from '../Enums/EnumRandomOperations';
 import { Constants } from '../Common/Constants';
+import { AppInsights } from '../Common/AppInsights';
 
 export class OtterBrassMessageController implements MessageControllerInterface {
 
@@ -176,54 +177,57 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         }
 
         const userDao = new UserDao();
-        const results: Map<User, EnumDaoResults> = await userDao.setOofStatus(channel, oofStatus, users);
-
-        for (const [key, value] of results) {
-            switch (value) {
-                case EnumDaoResults.SUCCESS:
-                    {
-                        usersOof += `${key.name}`;
-                        break;
-                    }
-                default:
-                case EnumDaoResults.NOT_FOUND:
-                case EnumDaoResults.NO_OP:
-                    {
-                        usersMissing += `${key.name}`;
-                        break;
-                    }
+        try {
+            const results: Map<User, EnumDaoResults> = await userDao.setOofStatus(channel, oofStatus, users);
+            for (const [key, value] of results) {
+                switch (value) {
+                    case EnumDaoResults.SUCCESS:
+                        {
+                            usersOof += `${key.name}`;
+                            break;
+                        }
+                    default:
+                    case EnumDaoResults.NOT_FOUND:
+                    case EnumDaoResults.NO_OP:
+                        {
+                            usersMissing += `${key.name}`;
+                            break;
+                        }
+                }
             }
-        }
 
-        let replyMsg = '';
-        if (usersOof) {
-            // Reply depends on the OOF Status that is being set
-            switch (oofStatus) {
-                case EnumOofStatus.Active:
-                    {
-                        replyMsg += BotMessages.ACTIVE_CORRECT.replace('{0}', usersOof);
-                        break;
-                    }
-                case EnumOofStatus.Oof:
-                    {
-                        replyMsg += BotMessages.OOF_CORRECT.replace('{0}', usersOof);
-                        break;
-                    }
-                default:
-                    {
-                        const ex =
-                            'Error occurred: None was not expected as a valid status while updating the OOF status.';
-                        throw new Error(ex);
-                    }
+            let replyMsg = '';
+            if (usersOof) {
+                // Reply depends on the OOF Status that is being set
+                switch (oofStatus) {
+                    case EnumOofStatus.Active:
+                        {
+                            replyMsg += BotMessages.ACTIVE_CORRECT.replace('{0}', usersOof);
+                            break;
+                        }
+                    case EnumOofStatus.Oof:
+                        {
+                            replyMsg += BotMessages.OOF_CORRECT.replace('{0}', usersOof);
+                            break;
+                        }
+                    default:
+                        {
+                            const ex =
+                                'Error occurred: None was not expected as a valid status while updating the OOF status.';
+                            throw new Error(ex);
+                        }
+                }
             }
-        }
 
-        if (usersMissing) {
-            replyMsg += BotMessages.OOF_INCORRECT.replace('{0}', usersMissing);
-        }
+            if (usersMissing) {
+                replyMsg += BotMessages.OOF_INCORRECT.replace('{0}', usersMissing);
+            }
 
-        await this.channelControllerInstance.createReply(replyMsg, activity);
-        return;
+            await this.channelControllerInstance.createReply(replyMsg, activity);
+            return;
+        } catch (error) {
+            AppInsights.instance.logException(JSON.stringify(error));
+        }
     }
 
     /**
@@ -252,31 +256,33 @@ export class OtterBrassMessageController implements MessageControllerInterface {
         currentUser.userChannel = channel;
 
         const userDao: UserDao = new UserDao();
+        try {
+            let replyMsg = '';
+            switch (randomStatus) {
+                case EnumRandomOperations.Add:
+                    {
+                        await userDao.addRandom(currentUser);
+                        replyMsg += BotMessages.RANDOM_CORRECT.replace('{0}', currentUser.name);
+                        break;
+                    }
+                case EnumRandomOperations.Remove:
+                    {
+                        await userDao.removeRandom(currentUser);
+                        replyMsg += BotMessages.RANDOM_REMOVE.replace('{0}', currentUser.name);
+                        break;
+                    }
+                default:
+                    {
+                        const ex =
+                            'Error occurred: could not include you in random reviews.';
+                        throw new Error(ex);
+                    }
+            }
 
-        let replyMsg = '';
-        switch (randomStatus) {
-            case EnumRandomOperations.Add:
-                {
-                    await userDao.addRandom(currentUser);
-                    replyMsg += BotMessages.RANDOM_CORRECT.replace('{0}', currentUser.name);
-                    break;
-                }
-            case EnumRandomOperations.Remove:
-                {
-                    await userDao.removeRandom(currentUser);
-                    replyMsg += BotMessages.RANDOM_REMOVE.replace('{0}', currentUser.name);
-                    break;
-                }
-            default:
-                {
-                    const ex =
-                        'Error occurred: could not include you in random reviews.';
-                    throw new Error(ex);
-                }
+            await this.channelControllerInstance.createReply(replyMsg, activity);
+        } catch (error) {
+            AppInsights.instance.logException(JSON.stringify(error));
         }
-
-        await this.channelControllerInstance.createReply(replyMsg, activity);
-        return;
     }
 
     /**
@@ -476,7 +482,12 @@ export class OtterBrassMessageController implements MessageControllerInterface {
                     BotMessages.USER_REMOVE_SUCCEEDED.replace('{0}', (user.name || 'ERROR GETTING THE USER NAME'));
                 user.userChannel = channel;
                 const userDao = new UserDao();
-                await userDao.removeUser(user);
+
+                try {
+                    await userDao.removeUser(user);
+                } catch (error) {
+                    AppInsights.instance.logException(JSON.stringify(error));
+                }
             }
         }
 
@@ -587,7 +598,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             // We also need to take out any excluded users
             if (excludedUsers) {
                 filteredList = filteredList.filter(user => {
-                    for (const excludedUser of excludedUsers){
+                    for (const excludedUser of excludedUsers) {
                         if (user.id !== excludedUser.id && user.name !== excludedUser.name) {
                             return user;
                         }
@@ -650,7 +661,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
                         // We want the list ordered from first to bottom.
                         return n2.rank - n1.rank
                     }
-                        return -1
+                    return -1
 
                 });
 
@@ -670,8 +681,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             }
         }
         catch (error) {
-            // #2 handle error gracefully
-            console.error(error);
+            AppInsights.instance.logException(JSON.stringify(error));
             await this.channelControllerInstance.createReply(BotMessages.INCORRECT_INSTRUCTION_PRIVATE, activity);
         }
     }

@@ -3,6 +3,7 @@ import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { User } from '../Models/User';
 import { EnumDaoResults } from '../Enums/EnumDaoResults';
 import { Constants } from '../Common/Constants';
+import { AppInsights } from '../Common/AppInsights';
 
 const sql = require('mssql');
 
@@ -45,8 +46,7 @@ export class ReviewDao {
             sql.close();
             return user;
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);
+            AppInsights.instance.logException(JSON.stringify(error));
             throw error;
         }
     }
@@ -77,8 +77,7 @@ export class ReviewDao {
             sql.close();
             return result;
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);
+            AppInsights.instance.logException(JSON.stringify(error));
             throw error;
         }
     }
@@ -108,8 +107,8 @@ export class ReviewDao {
             sql.close();
             return results;
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
     }
 
@@ -137,8 +136,8 @@ export class ReviewDao {
                 sql.close();
             }
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
 
         return results;
@@ -160,8 +159,8 @@ export class ReviewDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
     }
 
@@ -201,8 +200,7 @@ export class ReviewDao {
             channel.randomness = channelRandomness;
             return channel;
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);
+            AppInsights.instance.logException(JSON.stringify(error));
             throw error;
         }
     }

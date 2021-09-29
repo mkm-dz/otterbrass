@@ -9,6 +9,7 @@ import { BotMessages } from '../Common/BotMessage';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { ReviewDao } from '../Dao/ReviewDao';
 import { Constants } from '../Common/Constants';
+import { AppInsights } from '../Common/AppInsights';
 
 export class CommonMessagesController {
     private static _myLazyController: CommonMessagesController;
@@ -85,8 +86,13 @@ export class CommonMessagesController {
                 replyMsg += user.name + ', ';
                 user.userChannel = channel;
                 const userDao = new UserDao();
-                // TODO: Move this to a promise array and complete using Promise.all.
-                await userDao.addUser(user);
+                try{
+                    // TODO: Move this to a promise array and complete using Promise.all.
+                    await userDao.addUser(user);
+                } catch(error) {
+                    AppInsights.instance.logException(JSON.stringify(error));
+                }
+
             }
         }
 

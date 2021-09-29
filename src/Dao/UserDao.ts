@@ -3,6 +3,7 @@ import { Channel } from '../Models/Channel';
 import { EnumOofStatus } from '../Enums/EnumOofStatus';
 import { EnumDaoResults } from '../Enums/EnumDaoResults';
 import { Constants } from '../Common/Constants';
+import { AppInsights } from '../Common/AppInsights';
 
 const sql = require('mssql');
 
@@ -17,7 +18,6 @@ export class UserDao {
     public async addUser(user: User) {
         try {
             if (!user.userChannel || !user.userChannel.id) {
-                // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -32,8 +32,7 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);
+            AppInsights.instance.logException(JSON.stringify(error));
             throw error;
         }
     }
@@ -41,7 +40,6 @@ export class UserDao {
     public async removeUser(user: User) {
         try {
             if (!user.userChannel || !user.userChannel.id) {
-                // #2: Log exception gracefully.
                 throw new Error('Could not remove user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -55,8 +53,8 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
     }
 
@@ -80,7 +78,6 @@ export class UserDao {
                 {
 
                     if (!user.userChannel || !user.userChannel.id) {
-                        // #2: Log exception gracefully.
                         throw new Error('Could not remove user because a channel was not provided.')
                     }
                     const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -98,8 +95,8 @@ export class UserDao {
                 }
             }
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
 
         return result;
@@ -129,8 +126,8 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
 
         return results;
@@ -143,7 +140,6 @@ export class UserDao {
     public async addRandom(user: User) {
         try {
             if (!user.userChannel || !user.userChannel.id) {
-                // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -155,8 +151,8 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
     }
 
@@ -167,7 +163,6 @@ export class UserDao {
     public async removeRandom(user: User) {
         try {
             if (!user.userChannel || !user.userChannel.id) {
-                // #2: Log exception gracefully.
                 throw new Error('Could not add user because a channel was not provided.')
             }
             const pool = await sql.connect(Constants.SERVER_CONFIG);
@@ -179,8 +174,8 @@ export class UserDao {
             pool.close();
             sql.close();
         } catch (error) {
-            // #2: handle error gracefully.
-            console.error(error);throw error;
+            AppInsights.instance.logException(JSON.stringify(error));
+            throw error;
         }
     }
 }
