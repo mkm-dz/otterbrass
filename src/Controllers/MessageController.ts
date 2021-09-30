@@ -21,14 +21,14 @@ export class MessageController {
         }
 
         const activity = context.activity;
-        const _messageController: MessageControllerInterface = OtterBrassMessageController.instance(context);
-        const _channelController: ChannelControllersInterface = TeamsChannelController.instance(context);
+        const _messageController: MessageControllerInterface = new OtterBrassMessageController(context);
+        const _channelController: ChannelControllersInterface = new TeamsChannelController(context);
 
         switch (InstructionsParser.parse(activity.text))
         {
             case EnumInstructions.AddUser:
                 {
-                    _messageController.addUser(activity);
+                    await _messageController.addUser(activity);
                     break;
                 }
             case EnumInstructions.NextInLine:

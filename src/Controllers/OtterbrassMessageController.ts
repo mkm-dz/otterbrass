@@ -18,34 +18,17 @@ import { AppInsights } from '../Common/AppInsights';
 
 export class OtterBrassMessageController implements MessageControllerInterface {
 
-    private static _myLazyController: OtterBrassMessageController;
     private context: TurnContext;
     private channelControllerInstance: ChannelControllersInterface;
     private _commonMessageController: CommonMessagesController;
 
-    private static readonly myLazyController = (context: TurnContext) => {
-        if (!OtterBrassMessageController._myLazyController) {
-            OtterBrassMessageController._myLazyController = new OtterBrassMessageController(context);
-        }
-
-        OtterBrassMessageController._myLazyController.context = context;
-        return OtterBrassMessageController._myLazyController;
-    }
-
     /**
      * Initializes a new instance of the <see cref="OtterBrassMessageController"/> class.
      */
-    private constructor(context: TurnContext) {
+    public constructor(context: TurnContext) {
         this.context = context;
-        this.channelControllerInstance = TeamsChannelController.instance(this.context);
-        this._commonMessageController = CommonMessagesController.instance(this.context);
-    }
-
-    /**
-     * Gets a singleton instance of the HttpController class.
-     */
-    public static instance(context: TurnContext): MessageControllerInterface {
-        return OtterBrassMessageController.myLazyController(context);
+        this.channelControllerInstance = new  TeamsChannelController(this.context);
+        this._commonMessageController = new CommonMessagesController(this.context);
     }
 
     /**
