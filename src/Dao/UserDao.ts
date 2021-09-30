@@ -31,6 +31,7 @@ export class UserDao {
 
             pool.close();
             sql.close();
+            AppInsights.instance.logTrace(`[addUser] ${JSON.stringify(user)}`);
         } catch (error) {
             AppInsights.instance.logException(JSON.stringify(error));
             throw error;
@@ -52,6 +53,7 @@ export class UserDao {
 
             pool.close();
             sql.close();
+            AppInsights.instance.logTrace(`[removeUser] ${JSON.stringify(user)}`);
         } catch (error) {
             AppInsights.instance.logException(JSON.stringify(error));
             throw error;
@@ -92,6 +94,7 @@ export class UserDao {
                     sql.close();
 
                     result.set(user, data.output.result);
+                    AppInsights.instance.logTrace(`[setOofStatus] ${JSON.stringify(user)}`);
                 }
             }
         } catch (error) {
@@ -125,6 +128,8 @@ export class UserDao {
 
             pool.close();
             sql.close();
+            AppInsights.instance.logTrace(`[getOofUsers] ${JSON.stringify(channel)}`);
+
         } catch (error) {
             AppInsights.instance.logException(JSON.stringify(error));
             throw error;
@@ -150,6 +155,7 @@ export class UserDao {
 
             pool.close();
             sql.close();
+            AppInsights.instance.logTrace(`[addRandom] ${JSON.stringify(user)}`);
         } catch (error) {
             AppInsights.instance.logException(JSON.stringify(error));
             throw error;
@@ -173,6 +179,7 @@ export class UserDao {
 
             pool.close();
             sql.close();
+            AppInsights.instance.logTrace(`[removeRandom] ${JSON.stringify(user)}`);
         } catch (error) {
             AppInsights.instance.logException(JSON.stringify(error));
             throw error;

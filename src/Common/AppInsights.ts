@@ -5,14 +5,12 @@ export class AppInsights {
     private client;
 
     private constructor() {
-        /* Used for debugging purposes, we don't want to send debug information to appInsights. */
-        if (!process.env.skipTelemetry) {
-            appInsights.setup(process.env.AppInsightsInstrumentationKey).start();
-        } else {
-            appInsights = new MockAppInsights();
-        }
-
+        appInsights.setup(process.env.AppInsightsInstrumentationKey).start();
         this.client = appInsights.defaultClient;
+        /* Used for debugging purposes, we don't want to send debug information to appInsights. */
+        if (process.env.skipTelemetry) {
+            appInsights.defaultClient.config.disableAppInsights = true
+        }
     }
 
     static get instance(): AppInsights {
@@ -28,19 +26,6 @@ export class AppInsights {
     }
 
     public logTrace(msg: string) {
-        this.client.trackTrace(msg);
-    }
-}
-
-/**
- * Used for debugging purposes, we don't want to send debug information to appInsights.
- */
-class MockAppInsights {
-    public defaultClient;
-    public constructor() {
-        this.defaultClient = {
-            trackException: (exception: any) => console.log(JSON.stringify(exception)),
-            trackTrace: (exception: any) => console.log(JSON.stringify(exception)),
-        }
+        this.client.trackTrace({message: msg});
     }
 }

@@ -9,7 +9,6 @@ import { BotMessages } from '../Common/BotMessage';
 import { EnumShirtSize } from '../Enums/EnumShirtSize';
 import { ReviewDao } from '../Dao/ReviewDao';
 import { Constants } from '../Common/Constants';
-import { AppInsights } from '../Common/AppInsights';
 
 export class CommonMessagesController {
     private static _myLazyController: CommonMessagesController;
@@ -67,12 +66,12 @@ export class CommonMessagesController {
                 users = new Array<User>();
             }
 
-            // TODO: verify this logic as it changed when migrated.
-            users = { ...users, ...tempList };
+            users = [ ...users, ...tempList ];
         }
 
         let replyMsg = '';
         if (users) {
+            const addUserArray = [];
             for (const user of users) {
                 if (!user) {
                     continue;
@@ -86,14 +85,10 @@ export class CommonMessagesController {
                 replyMsg += user.name + ', ';
                 user.userChannel = channel;
                 const userDao = new UserDao();
-                try{
-                    // TODO: Move this to a promise array and complete using Promise.all.
-                    await userDao.addUser(user);
-                } catch(error) {
-                    AppInsights.instance.logException(JSON.stringify(error));
-                }
-
+                addUserArray.push(userDao.addUser(user))
             }
+
+            await Promise.all(addUserArray);
         }
 
         if (!replyMsg) {
