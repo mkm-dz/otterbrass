@@ -79,15 +79,15 @@ export class UserDao {
             for (const user of users) {
                 {
 
-                    if (!user.userChannel || !user.userChannel.id) {
+                    if (!channel || !channel.id) {
                         throw new Error('Could not remove user because a channel was not provided.')
                     }
                     const pool = await sql.connect(Constants.SERVER_CONFIG);
                     const data = await pool.request()
-                        .input('channelId', sql.NVarChar, user.userChannel.id)
+                        .input('channelId', sql.NVarChar, channel.id)
                         .input('userId', sql.NVarChar, user.id)
-                        .input('oofStatus', sql.Int, user.name)
-                        .output('result', sql.Int, user.userChannel.name)
+                        .input('oofStatus', sql.Int, oofStatus)
+                        .output('result', sql.Int)
                         .execute('usp_SetOof');
 
                     pool.close();
@@ -120,8 +120,8 @@ export class UserDao {
 
             for (const item of data.recordset) {
                 const currentUser = new User();
-                currentUser.id = item.id;
-                currentUser.name = item.name;
+                currentUser.id = item.Id;
+                currentUser.name = item.Name;
                 currentUser.userChannel = channel;
                 results.push(currentUser);
             }
