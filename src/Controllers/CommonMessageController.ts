@@ -1,6 +1,6 @@
 import { ChannelControllersInterface } from '../Interfaces/ChannelControllersInterface';
 import { TeamsChannelController } from './TeamsChannelController';
-import { Activity, Entity, Mention, ChannelAccount, TurnContext } from 'botbuilder';
+import { Activity, Mention, ChannelAccount, TurnContext } from 'botbuilder';
 import { Channel } from '../Models/Channel';
 import { User } from '../Models/User';
 import { Utilities } from '../Common/Utilities';
