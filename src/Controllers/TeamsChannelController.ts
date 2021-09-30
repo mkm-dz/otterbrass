@@ -5,32 +5,14 @@ import { Utilities } from '../Common/Utilities';
 
 export class TeamsChannelController implements ChannelControllersInterface
 {
-    private static _myLazyController: TeamsChannelController;
     private context: TurnContext;
-
-    private static readonly myLazyController = (context: TurnContext) => {
-        if (!TeamsChannelController._myLazyController) {
-            TeamsChannelController._myLazyController = new TeamsChannelController(context);
-        }
-
-        TeamsChannelController._myLazyController.context = context;
-        return TeamsChannelController._myLazyController;
-    }
 
     /**
      * Initializes a new instance of the <see cref="TeamsChannelController"/> class.
      */
-    private constructor(context: TurnContext)
+    public constructor(context: TurnContext)
     {
         this.context = context
-    }
-
-    /**
-     * Gets a singleton instance of the HttpController class.
-     */
-    public static instance(context: TurnContext): ChannelControllersInterface
-    {
-        return TeamsChannelController.myLazyController(context);
     }
 
     /**
