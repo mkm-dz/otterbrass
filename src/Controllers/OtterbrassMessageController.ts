@@ -496,7 +496,7 @@ export class OtterBrassMessageController implements MessageControllerInterface {
             await this.channelControllerInstance.createReply(BotMessages.INCORRECT_MESSAGE, activity);
         }
         else {
-            // User was successfully added.
+            // User was successfully removed.
             await this.channelControllerInstance.createReply(replyMsg, activity);
         }
     }
