@@ -8,7 +8,7 @@
     "scripts": {
         "build": "webpack --env compilationMode=dev",
         "release": "webpack  --env compilationMode=production && node ./deploymentScripts/webConfigPrep.js",
-        "lint": "tslint -c tslint.json 'src/**/*.ts'",
+        "lint": "eslint -c .eslintrc.js src/**/*.ts",
         "start": "npm run build && node ./dist/index.js",
         "test": "echo \"Error: no test specified\" && exit 1",
         "watch": "nodemon --watch ./src -e ts --exec \"npm run start\""
@@ -18,29 +18,31 @@
         "url": "https://github.com"
     },
     "dependencies": {
-        "applicationinsights": "2.1.8",
-        "botbuilder": "4.14.1",
-        "botframework-directlinejs": "0.15.0",
-        "dotenv": "10.0.0",
+        "applicationinsights": "2.3.1",
+        "botbuilder": "4.15.0",
+        "botframework-directlinejs": "0.15.1",
+        "dotenv": "16.0.0",
         "replace": "1.2.1",
-        "restify": "8.6.0"
+        "restify": "8.6.1"
     },
     "devDependencies": {
-        "@types/node": "16.10.2",
-        "@types/restify": "8.5.2",
-        "@typescript-eslint/eslint-plugin": "4.32.0",
-        "@typescript-eslint/parser": "4.32.0",
-        "eslint": "7.32.0",
-        "eslint-loader": "4.0.2",
-        "mssql": "7.2.1",
-        "nodemon": "2.0.13",
-        "source-map-loader": "3.0.0",
-        "terser-webpack-plugin": "5.2.4",
-        "ts-loader": "9.2.6",
-        "tslint": "6.1.2",
-        "typescript": "4.4.3",
-        "webpack": "5.55.1",
-        "webpack-cli": "4.8.0",
+        "@types/node": "17.0.23",
+        "@types/restify": "8.5.4",
+        "@typescript-eslint/eslint-plugin": "5.18.0",
+        "@typescript-eslint/parser": "5.18.0",
+        "eslint": "8.13.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-jsdoc": "^39.0.1",
+        "eslint-plugin-prefer-arrow": "^1.2.3",
+        "eslint-plugin-react": "^7.29.4",
+        "mssql": "8.1.0",
+        "nodemon": "2.0.15",
+        "source-map-loader": "3.0.1",
+        "terser-webpack-plugin": "5.3.1",
+        "ts-loader": "9.2.8",
+        "typescript": "4.6.3",
+        "webpack": "5.72.0",
+        "webpack-cli": "4.9.2",
         "webpack-node-externals": "3.0.0"
     }
 }
