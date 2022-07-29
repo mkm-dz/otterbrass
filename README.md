@@ -1,5 +1,5 @@
 # Otterbrass
-Otterbrass is a MS Teams bot that distribute workitems load among suscribed members over a channel.
+Otterbrass is a MS Teams bot that distribute workitems load among subscribed members over a channel.
 
 # Prerequisites
 - A SQL Server and a blank database configured.
