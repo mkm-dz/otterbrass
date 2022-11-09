@@ -22,7 +22,7 @@
         "botbuilder": "4.16.0",
         "botframework-directlinejs": "0.15.1",
         "dotenv": "16.0.1",
-        "replace": "1.2.1",
+        "replace": "1.2.2",
         "restify": "8.6.1"
     },
     "devDependencies": {
