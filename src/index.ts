@@ -57,7 +57,7 @@ adapter.onTurnError = onTurnErrorHandler;
 const myBot = new EchoBot();
 
 // Listen for incoming requests.
-server.post('/api/messages', (req, res) => {
+server.post('/api/messages', (req, res, next) => {
     adapter.processActivity(req, res, async context => {
         // Route to main dialog.
         await myBot.run(context);
