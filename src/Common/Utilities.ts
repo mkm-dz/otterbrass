@@ -68,26 +68,65 @@ export class Utilities {
             return null;
         }
 
-        const users = entities.filter(item => {
-            // filter mentions
+        // Reenable this code and delete the workaround once this has been fixed :
+        // https://github.com/microsoft/botbuilder-js/issues/4379
+
+        // const users = entities.filter(item => {
+        //     // filter mentions
+        //     if (Constants.MENTION === item.type) {
+        //         return item;
+        //     }
+        // }).map(item => {
+
+        //     const user = new User();
+        //     const mention = item as Mention;
+        //     user.id = mention.mentioned.id;
+        //     user.name = mention.mentioned.name;
+        //     return user;
+        // }).filter(item => {
+        //     if (item && removeOtterBrass && !Utilities.filterOtterBrassUser(item)) {
+        //         return item;
+        //     }
+        // });
+        //
+        // return users;
+
+        // Start Workaround
+        const namesMap: Map<string, string> = new Map();
+        entities.filter(item => {
             if (Constants.MENTION === item.type) {
                 return item;
-            }}).map(item => {
+            }
+        }).map(item => {
+            const mention = item as Mention;
+            let previousUser = namesMap.get(mention.mentioned.id);
 
-                const user = new User();
-                const mention = item as Mention;
-                user.id = mention.mentioned.id;
-                user.name = mention.mentioned.name;
-                return user;
-            }).filter(item => {
-                if (item && removeOtterBrass && !Utilities.filterOtterBrassUser(item)){
-                    return item;
-                }
+            let finalName = null;
+            // Already accounted for start appending name instead of adding them again
+            if (previousUser) {
+                finalName = previousUser + ' ' + mention.mentioned.name;
+            } else {
+                finalName = mention.mentioned.name;
             }
 
-            )
+            namesMap.set(mention.mentioned.id, finalName);
+        })
+
+        // Construct the users
+        const users: User[] = [];
+        for (let [key, value] of namesMap) {
+            const user = new User();
+            user.id = key;
+            user.name = value;
+
+            // Filter Otterbrass
+            if (removeOtterBrass && !Utilities.filterOtterBrassUser(user)) {
+                users.push(user);
+            }
+        }
 
         return users;
+        // End Workaround
     }
 
     /**
