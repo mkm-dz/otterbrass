@@ -3,7 +3,7 @@ Otterbrass is a MS Teams bot that distribute workitems load among subscribed mem
 
 # Prerequisites
 - A SQL Server and a blank database configured.
-- Node 10.X  or higher
+- Node 20.X  or higher
 
 # Set up database
 - Go to `dbScripts` folder 
