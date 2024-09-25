@@ -5,7 +5,7 @@ Contributions are always welcome! We only ask that you open an issue first so we
 # Development setup
 ## Prerequisites
 - A SQL Server and a blank database configured.
-- Node 10.X  or higher
+- Node 20.X  or higher
 
 ## Set up database
 - Go to `dbScripts` folder 

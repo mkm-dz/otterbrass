@@ -3,7 +3,7 @@ Otterbrass is a MS Teams bot that distribute workitems load among subscribed mem
 
 # Prerequisites
 - A SQL Server and a blank database configured.
-- Node 10.X  or higher
+- Node 20.X  or higher
 
 # Set up database
 - Go to `dbScripts` folder 
@@ -28,6 +28,7 @@ Otterbrass is a MS Teams bot that distribute workitems load among subscribed mem
   - package.json
   - package-lock.json
 - Copy the `node_modules` folder to your wwwroot folder, or run `npm install` into your server console (in the wwwroot) folder. More on why in [here](https://github.com/liady/webpack-node-externals)
+    - If the console timeouts on `npm install` try `npm install --omit=dev` that will only install the runtime dependencies.
 
 - Restart your server.
 - Deploy your bot to teams channel using the following instructions:
